@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
+import { Send, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -16,6 +16,21 @@ export const ChatBox = () => {
   const [currentTicker, setCurrentTicker] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  const handleRefresh = () => {
+    setMessages([
+      { 
+        text: "Hello! I'm ATLAS (Automated Trading and Learning Analysis System). To get started, please enter a ticker symbol (e.g., BTC, ETH) or project name you'd like me to research.", 
+        isUser: false 
+      },
+    ]);
+    setCurrentTicker(null);
+    setMessage("");
+    toast({
+      title: "Conversation Reset",
+      description: "The conversation has been reset. You can start a new analysis.",
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,12 +118,23 @@ export const ChatBox = () => {
 
   return (
     <div className="w-full h-[100dvh] md:h-[500px] flex flex-col bg-black/30 backdrop-blur-md rounded-lg shadow-xl overflow-hidden border border-purple-500/20">
-      <div className="bg-purple-900/30 p-4 border-b border-purple-500/20">
-        <h1 className="text-2xl font-bold text-white">ATLAS</h1>
-        <p className="text-purple-200/70 text-sm">Automated Trading and Learning Analysis System</p>
-        {currentTicker && (
-          <p className="text-purple-200/90 text-sm mt-1">Currently analyzing: {currentTicker}</p>
-        )}
+      <div className="bg-purple-900/30 p-4 border-b border-purple-500/20 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-white">ATLAS</h1>
+          <p className="text-purple-200/70 text-sm">Automated Trading and Learning Analysis System</p>
+          {currentTicker && (
+            <p className="text-purple-200/90 text-sm mt-1">Currently analyzing: {currentTicker}</p>
+          )}
+        </div>
+        <Button
+          onClick={handleRefresh}
+          variant="ghost"
+          size="icon"
+          className="text-purple-200 hover:text-white hover:bg-purple-500/20"
+          disabled={isLoading}
+        >
+          <RefreshCw className="h-5 w-5" />
+        </Button>
       </div>
       <div className="flex-1 p-4 overflow-y-auto">
         {messages.map((msg, index) => (
