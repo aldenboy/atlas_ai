@@ -1,32 +1,32 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import { useEffect } from "react";
+import { Toaster } from "@/components/ui/toaster";
+import Index from "@/pages/Index";
+import { Auth } from "@/components/auth/Auth";
+import { AuthRoute } from "@/components/auth/AuthRoute";
+import "./App.css";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  useEffect(() => {
-    // Force dark mode
-    document.documentElement.classList.add('dark');
-  }, []);
-
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <Router>
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
+          <Route
+            path="/"
+            element={
+              <AuthRoute>
+                <Index />
+              </AuthRoute>
+            }
+          />
+        </Routes>
+      </Router>
+      <Toaster />
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
