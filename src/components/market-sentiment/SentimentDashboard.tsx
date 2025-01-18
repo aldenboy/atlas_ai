@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const SentimentDashboard = () => {
   const { data: sentimentData, isLoading, error } = useQuery({
@@ -69,46 +70,99 @@ export const SentimentDashboard = () => {
         <CardTitle>Market Sentiment Analysis</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={sentimentData}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis 
-                dataKey="symbol" 
-                tick={{ fill: 'currentColor' }}
-              />
-              <YAxis 
-                tick={{ fill: 'currentColor' }}
-                domain={[0, 1]}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'var(--background)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '6px',
-                  color: 'var(--foreground)'
-                }}
-              />
-              <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="sentiment_score" 
-                stroke="#8884d8" 
-                name="Sentiment Score"
-                strokeWidth={2}
-                dot={false}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="news_sentiment" 
-                stroke="#82ca9d" 
-                name="News Sentiment"
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <Tabs defaultValue="sentiment" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="sentiment">Sentiment</TabsTrigger>
+            <TabsTrigger value="market">Market Data</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="sentiment" className="space-y-4">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={sentimentData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="symbol" 
+                    tick={{ fill: 'currentColor' }}
+                  />
+                  <YAxis 
+                    tick={{ fill: 'currentColor' }}
+                    domain={[0, 1]}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'var(--background)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '6px',
+                      color: 'var(--foreground)'
+                    }}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="sentiment_score" 
+                    stroke="#8884d8" 
+                    name="Sentiment Score"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="news_sentiment" 
+                    stroke="#82ca9d" 
+                    name="News Sentiment"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="market" className="space-y-4">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={sentimentData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="symbol" 
+                    tick={{ fill: 'currentColor' }}
+                  />
+                  <YAxis 
+                    tick={{ fill: 'currentColor' }}
+                    yAxisId="left"
+                  />
+                  <YAxis 
+                    tick={{ fill: 'currentColor' }}
+                    yAxisId="right"
+                    orientation="right"
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'var(--background)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '6px',
+                      color: 'var(--foreground)'
+                    }}
+                  />
+                  <Legend />
+                  <Bar 
+                    dataKey="volume_24h" 
+                    fill="#8884d8" 
+                    name="24h Volume"
+                    yAxisId="left"
+                  />
+                  <Bar 
+                    dataKey="price_change_24h" 
+                    fill="#82ca9d" 
+                    name="24h Price Change (%)"
+                    yAxisId="right"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

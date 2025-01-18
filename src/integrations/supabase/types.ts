@@ -189,29 +189,38 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          market_cap: number | null
           news_sentiment: number | null
+          price_change_24h: number | null
           sentiment_score: number
           social_mentions: number | null
           symbol: string
           updated_at: string | null
+          volume_24h: number | null
         }
         Insert: {
           created_at?: string | null
           id?: string
+          market_cap?: number | null
           news_sentiment?: number | null
+          price_change_24h?: number | null
           sentiment_score: number
           social_mentions?: number | null
           symbol: string
           updated_at?: string | null
+          volume_24h?: number | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          market_cap?: number | null
           news_sentiment?: number | null
+          price_change_24h?: number | null
           sentiment_score?: number
           social_mentions?: number | null
           symbol?: string
           updated_at?: string | null
+          volume_24h?: number | null
         }
         Relationships: []
       }
