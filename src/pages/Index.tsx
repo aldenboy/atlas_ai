@@ -33,6 +33,10 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
+
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
