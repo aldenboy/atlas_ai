@@ -19,7 +19,7 @@ export const ChatBox = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || isLoading) return;
 
     setIsLoading(true);
     setMessages((prev) => [...prev, { text: message, isUser: true }]);
@@ -64,30 +64,34 @@ export const ChatBox = () => {
     } catch (error: any) {
       console.error('Error calling ATLAS:', error);
       
-      // Extract the error message from the response if available
       let errorMessage = 'Failed to get response from ATLAS. Please try again.';
+      let variant: "default" | "destructive" = "destructive";
+      
       try {
         if (error.message && typeof error.message === 'string') {
           const errorBody = JSON.parse(error.message);
           if (errorBody.error) {
             errorMessage = errorBody.error;
+            // If it's a rate limit error, use a less alarming toast style
+            if (errorBody.isRateLimit) {
+              variant = "default";
+            }
           }
         }
       } catch {
-        // If parsing fails, use the original error message
         errorMessage = error.message || errorMessage;
       }
       
       toast({
-        title: "Error",
+        title: variant === "destructive" ? "Error" : "Please Wait",
         description: errorMessage,
-        variant: "destructive"
+        variant: variant
       });
       
       setMessages((prev) => [
         ...prev,
         { 
-          text: "I apologize, but I encountered an error processing your request. Please try again in a moment.", 
+          text: errorMessage, 
           isUser: false 
         }
       ]);
