@@ -33,10 +33,8 @@ export const NeuralBackground = () => {
       canvas.width = displayWidth * dpr;
       canvas.height = displayHeight * dpr;
       
-      // Scale the context to ensure correct drawing operations
       ctx.scale(dpr, dpr);
       
-      // Set CSS size
       canvas.style.width = `${displayWidth}px`;
       canvas.style.height = `${displayHeight}px`;
     };
@@ -61,12 +59,11 @@ export const NeuralBackground = () => {
       mouse.y = 0;
     });
 
-    // Initialize nodes with adjusted parameters for better mobile display
+    // Initialize nodes with adjusted parameters
     const numNodes = isMobile ? 100 : 200;
     const connectionRadius = isMobile ? 100 : 150;
     const mouseRadius = isMobile ? 100 : 150;
     
-    // Calculate center and radius based on screen size
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
     const minDimension = Math.min(window.innerWidth, window.innerHeight);
@@ -79,13 +76,24 @@ export const NeuralBackground = () => {
       ...generateRandomNodes(centerX, centerY, faceRadius, numNodes)
     ];
 
-    // Animation loop with proper clearing
+    // Add time-based movement
+    let time = 0;
     const animate = () => {
+      time += 0.002;
       ctx.fillStyle = "rgba(26, 31, 44, 0.2)";
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
-      // Update and draw nodes
-      nodes.forEach(node => updateNodePosition(node, mouse, mouseRadius, canvas));
+      // Update nodes with time-based movement
+      nodes.forEach((node, index) => {
+        // Add subtle circular motion
+        const angle = time + index * 0.1;
+        node.x += Math.cos(angle) * 0.5;
+        node.y += Math.sin(angle) * 0.5;
+        
+        // Add mouse interaction
+        updateNodePosition(node, mouse, mouseRadius, canvas);
+      });
+
       drawConnections(ctx, nodes, connectionRadius);
       drawNodes(ctx, nodes);
 
