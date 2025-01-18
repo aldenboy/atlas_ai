@@ -33,26 +33,47 @@ export const NeuralBackground = () => {
       vy: number;
       radius: number;
     }[] = [];
-    const numNodes = 100;
-    const connectionRadius = 200; // Maximum distance for node connections
-    const mouseRadius = 150; // Radius of mouse influence
+    const numNodes = 150; // Increased number of nodes
+    const connectionRadius = 200;
+    const mouseRadius = 150;
 
-    // Initialize nodes in a spherical pattern
+    // Initialize nodes in a face-like pattern
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const faceRadius = Math.min(canvas.width, canvas.height) * 0.3;
+
     for (let i = 0; i < numNodes; i++) {
       const angle = (i / numNodes) * Math.PI * 2;
-      const radius = Math.random() * 200 + 100; // Vary the radius for a more natural look
+      // Create an oval shape for the face
+      const x = centerX + Math.cos(angle) * faceRadius * 1.2;
+      const y = centerY + Math.sin(angle) * faceRadius;
+      
       nodes.push({
-        x: canvas.width / 2 + Math.cos(angle) * radius,
-        y: canvas.height / 2 + Math.sin(angle) * radius,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
+        x,
+        y,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
         radius: Math.random() * 2 + 1,
       });
     }
 
+    // Add some nodes for eyes
+    const eyeOffset = faceRadius * 0.3;
+    [-1, 1].forEach(side => {
+      for (let i = 0; i < 10; i++) {
+        nodes.push({
+          x: centerX + side * eyeOffset + (Math.random() - 0.5) * 30,
+          y: centerY - faceRadius * 0.1 + (Math.random() - 0.5) * 30,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          radius: Math.random() * 2 + 1,
+        });
+      }
+    });
+
     // Animation
     const animate = () => {
-      ctx.fillStyle = "#1A1F2C"; // Dark Purple background
+      ctx.fillStyle = "rgba(26, 31, 44, 0.1)"; // Slightly transparent background
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Update and draw nodes
@@ -98,7 +119,7 @@ export const NeuralBackground = () => {
             ctx.beginPath();
             ctx.moveTo(node.x, node.y);
             ctx.lineTo(otherNode.x, otherNode.y);
-            ctx.strokeStyle = `rgba(155, 135, 245, ${opacity})`; // Purple lines
+            ctx.strokeStyle = `rgba(155, 135, 245, ${opacity})`;
             ctx.lineWidth = opacity;
             ctx.stroke();
           }
@@ -107,7 +128,7 @@ export const NeuralBackground = () => {
         // Draw node
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "#9b87f5"; // Primary Purple
+        ctx.fillStyle = "#9b87f5";
         ctx.fill();
       });
 

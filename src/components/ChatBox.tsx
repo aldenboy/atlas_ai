@@ -26,7 +26,7 @@ export const ChatBox = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-lg shadow-xl overflow-hidden">
+    <div className="w-full max-w-2xl mx-auto bg-black/30 backdrop-blur-md rounded-lg shadow-xl overflow-hidden border border-purple-500/20">
       <div className="h-[500px] p-4 overflow-y-auto">
         {messages.map((msg, index) => (
           <div
@@ -36,8 +36,8 @@ export const ChatBox = () => {
             <div
               className={`max-w-[80%] p-3 rounded-lg ${
                 msg.isUser
-                  ? "bg-purple-600 text-white"
-                  : "bg-white/20 text-white"
+                  ? "bg-purple-600/90 text-white"
+                  : "bg-white/10 text-white backdrop-blur-sm"
               }`}
             >
               {msg.text}
@@ -45,19 +45,22 @@ export const ChatBox = () => {
           </div>
         ))}
       </div>
-      <form onSubmit={handleSubmit} className="p-4 border-t border-purple-800">
-        <div className="flex gap-2">
+      <div className="p-4 border-t border-purple-500/20 bg-black/20">
+        <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type your message..."
-            className="flex-1 bg-white/10 border-purple-800 text-white placeholder:text-purple-300"
+            className="flex-1 bg-white/5 border-purple-500/30 text-white placeholder:text-purple-300/50 focus-visible:ring-purple-500/50"
           />
-          <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
+          <Button 
+            type="submit" 
+            className="bg-purple-600/90 hover:bg-purple-700/90 transition-colors"
+          >
             <Send className="h-4 w-4" />
           </Button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
