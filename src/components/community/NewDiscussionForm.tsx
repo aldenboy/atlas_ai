@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,11 +17,31 @@ import {
 export const NewDiscussionForm = ({ onClose }: { onClose: () => void }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [category, setCategory] = useState("general");
+  const [userId, setUserId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id);
+    };
+    
+    checkAuth();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!userId) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to create a discussion.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
@@ -29,15 +49,18 @@ export const NewDiscussionForm = ({ onClose }: { onClose: () => void }) => {
       title: String(formData.get("title")),
       content: String(formData.get("content")),
       category,
-      user_id: (await supabase.auth.getUser()).data.user?.id
+      user_id: userId
     };
 
     try {
       const { error } = await supabase
         .from("discussions")
-        .insert(data);
+        .insert([data]);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating discussion:", error);
+        throw error;
+      }
 
       toast({
         title: "Discussion Created",
@@ -47,6 +70,7 @@ export const NewDiscussionForm = ({ onClose }: { onClose: () => void }) => {
       queryClient.invalidateQueries({ queryKey: ["discussions"] });
       onClose();
     } catch (error) {
+      console.error("Error in handleSubmit:", error);
       toast({
         title: "Error",
         description: "Failed to create discussion. Please try again.",
@@ -91,7 +115,7 @@ export const NewDiscussionForm = ({ onClose }: { onClose: () => void }) => {
           </div>
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || !userId}>
               {isSubmitting ? "Creating..." : "Create Discussion"}
             </Button>
           </div>
