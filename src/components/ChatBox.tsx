@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export const ChatBox = () => {
   const [message, setMessage] = useState("");
@@ -12,42 +14,66 @@ export const ChatBox = () => {
     },
   ]);
   const [currentTicker, setCurrentTicker] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
+    setIsLoading(true);
     setMessages((prev) => [...prev, { text: message, isUser: true }]);
 
-    // Check if this is the first user message (ticker input)
-    if (!currentTicker) {
-      const ticker = message.trim().toUpperCase();
-      setCurrentTicker(ticker);
-      
-      // Respond with confirmation and next steps
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { 
-            text: `Thank you! I'll analyze ${ticker} for you. What specific information would you like to know? You can ask about:\n\n• Price analysis\n• Market trends\n• Trading volume\n• Historical performance\n• Recent news`, 
-            isUser: false 
-          },
-        ]);
-      }, 1000);
-    } else {
-      // Handle subsequent messages about the current ticker
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { 
-            text: `I'm analyzing ${currentTicker} based on your request: "${message}". Please wait while I gather the information...`, 
-            isUser: false 
-          },
-        ]);
-      }, 1000);
-    }
+    try {
+      // Check if this is the first user message (ticker input)
+      if (!currentTicker) {
+        const ticker = message.trim().toUpperCase();
+        setCurrentTicker(ticker);
+        
+        const { data, error } = await supabase.functions.invoke('chat-with-atlas', {
+          body: { 
+            message: `The user has selected ${ticker} as their asset of interest. Please acknowledge this and ask what specific information they would like to know about ${ticker}. Suggest some specific aspects they might be interested in.`,
+            currentTicker: ticker
+          }
+        });
 
-    setMessage("");
+        if (error) throw error;
+
+        setMessages((prev) => [
+          ...prev,
+          { text: data.response, isUser: false }
+        ]);
+      } else {
+        const { data, error } = await supabase.functions.invoke('chat-with-atlas', {
+          body: { message, currentTicker }
+        });
+
+        if (error) throw error;
+
+        setMessages((prev) => [
+          ...prev,
+          { text: data.response, isUser: false }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error calling ATLAS:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get response from ATLAS. Please try again.",
+        variant: "destructive"
+      });
+      
+      setMessages((prev) => [
+        ...prev,
+        { 
+          text: "I apologize, but I encountered an error processing your request. Please try again.", 
+          isUser: false 
+        }
+      ]);
+    } finally {
+      setIsLoading(false);
+      setMessage("");
+    }
   };
 
   return (
@@ -91,10 +117,12 @@ export const ChatBox = () => {
               : "Enter a ticker symbol or project name..."
             }
             className="flex-1 bg-white/5 border-purple-500/30 text-white placeholder:text-purple-300/50 focus-visible:ring-purple-500/50"
+            disabled={isLoading}
           />
           <Button 
             type="submit" 
             className="bg-purple-600/90 hover:bg-purple-700/90 transition-colors"
+            disabled={isLoading}
           >
             <Send className="h-4 w-4" />
           </Button>
