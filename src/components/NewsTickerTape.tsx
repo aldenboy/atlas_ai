@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Newspaper } from 'lucide-react';
 
 type NewsItem = {
@@ -7,16 +7,30 @@ type NewsItem = {
   category: 'market' | 'economy' | 'company';
 };
 
+// Mock API function - in a real app, this would fetch from a real news API
+const fetchLatestNews = (): NewsItem[] => {
+  const timestamp = new Date().toLocaleTimeString();
+  return [
+    { id: 1, text: `Fed signals potential rate cuts in 2024 (Updated ${timestamp})`, category: 'economy' },
+    { id: 2, text: `Apple announces new AI initiatives (Updated ${timestamp})`, category: 'company' },
+    { id: 3, text: `Bitcoin surges past key resistance level (Updated ${timestamp})`, category: 'market' },
+    { id: 4, text: `S&P 500 reaches new all-time high (Updated ${timestamp})`, category: 'market' },
+    { id: 5, text: `ECB maintains current monetary policy (Updated ${timestamp})`, category: 'economy' },
+    { id: 6, text: `Tesla expands operations in Asia (Updated ${timestamp})`, category: 'company' },
+  ];
+};
+
 export const NewsTickerTape = () => {
-  // Mock news data - in a real app, this would come from an API
-  const [news] = useState<NewsItem[]>([
-    { id: 1, text: "Fed signals potential rate cuts in 2024", category: 'economy' },
-    { id: 2, text: "Apple announces new AI initiatives", category: 'company' },
-    { id: 3, text: "Bitcoin surges past key resistance level", category: 'market' },
-    { id: 4, text: "S&P 500 reaches new all-time high", category: 'market' },
-    { id: 5, text: "ECB maintains current monetary policy", category: 'economy' },
-    { id: 6, text: "Tesla expands operations in Asia", category: 'company' },
-  ]);
+  const [news, setNews] = useState<NewsItem[]>(fetchLatestNews());
+
+  useEffect(() => {
+    // Update news every 30 seconds
+    const interval = setInterval(() => {
+      setNews(fetchLatestNews());
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="w-full bg-purple-900/50 border-b border-purple-500/20 overflow-hidden">
