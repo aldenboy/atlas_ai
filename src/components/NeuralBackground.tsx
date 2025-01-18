@@ -24,20 +24,35 @@ export const NeuralBackground = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set canvas size
+    // Set canvas size with proper device pixel ratio
     const setSize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = window.devicePixelRatio || 1;
+      const displayWidth = window.innerWidth;
+      const displayHeight = window.innerHeight;
+      
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+      
+      // Scale the context to ensure correct drawing operations
+      ctx.scale(dpr, dpr);
+      
+      // Set CSS size
+      canvas.style.width = `${displayWidth}px`;
+      canvas.style.height = `${displayHeight}px`;
     };
+    
     setSize();
     window.addEventListener("resize", setSize);
 
-    // Mouse position tracking with proper canvas coordinates
+    // Mouse position tracking with proper scaling
     const mouse: MousePosition = { x: 0, y: 0 };
     const updateMousePosition = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      
+      mouse.x = (e.clientX - rect.left) * scaleX;
+      mouse.y = (e.clientY - rect.top) * scaleY;
     };
     
     canvas.addEventListener("mousemove", updateMousePosition);
@@ -46,13 +61,16 @@ export const NeuralBackground = () => {
       mouse.y = 0;
     });
 
-    // Initialize nodes with adjusted parameters
-    const numNodes = isMobile ? 150 : 250; // Reduce nodes on mobile
-    const connectionRadius = isMobile ? 120 : 180;
-    const mouseRadius = isMobile ? 120 : 180;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const faceRadius = Math.min(canvas.width, canvas.height) * (isMobile ? 0.2 : 0.3);
+    // Initialize nodes with adjusted parameters for better mobile display
+    const numNodes = isMobile ? 100 : 200;
+    const connectionRadius = isMobile ? 100 : 150;
+    const mouseRadius = isMobile ? 100 : 150;
+    
+    // Calculate center and radius based on screen size
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const minDimension = Math.min(window.innerWidth, window.innerHeight);
+    const faceRadius = minDimension * (isMobile ? 0.25 : 0.35);
 
     const nodes: Node[] = [
       ...generateFaceOutlineNodes(centerX, centerY, faceRadius, numNodes),
@@ -61,10 +79,10 @@ export const NeuralBackground = () => {
       ...generateRandomNodes(centerX, centerY, faceRadius, numNodes)
     ];
 
-    // Animation loop
+    // Animation loop with proper clearing
     const animate = () => {
       ctx.fillStyle = "rgba(26, 31, 44, 0.2)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
       // Update and draw nodes
       nodes.forEach(node => updateNodePosition(node, mouse, mouseRadius, canvas));
