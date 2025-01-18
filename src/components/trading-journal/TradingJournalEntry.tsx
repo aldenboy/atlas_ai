@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MessageSquare } from "lucide-react";
 import { formatDistance } from "date-fns";
+import { TradeComments } from "./TradeComments";
 
 interface Trade {
   id: string;
@@ -13,6 +17,8 @@ interface Trade {
 }
 
 export const TradingJournalEntry = ({ trade }: { trade: Trade }) => {
+  const [showComments, setShowComments] = useState(false);
+  
   const pnl = trade.exit_price 
     ? (trade.exit_price - trade.entry_price) * trade.position_size 
     : null;
@@ -41,6 +47,20 @@ export const TradingJournalEntry = ({ trade }: { trade: Trade }) => {
         </div>
         {trade.notes && (
           <p className="mt-2 text-sm text-muted-foreground">{trade.notes}</p>
+        )}
+        <div className="mt-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowComments(!showComments)}
+            className="space-x-2"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>{showComments ? "Hide Comments" : "Show Comments"}</span>
+          </Button>
+        </div>
+        {showComments && (
+          <TradeComments tradeId={trade.id} />
         )}
       </CardContent>
     </Card>

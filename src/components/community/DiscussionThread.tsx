@@ -3,6 +3,7 @@ import { formatDistance } from "date-fns";
 import { MessageSquare, ThumbsUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { DiscussionComments } from "./DiscussionComments";
 
 interface Discussion {
   id: string;
@@ -16,6 +17,7 @@ interface Discussion {
 
 export const DiscussionThread = ({ discussion }: { discussion: Discussion }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   return (
     <Card className="hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
@@ -28,7 +30,15 @@ export const DiscussionThread = ({ discussion }: { discussion: Discussion }) => 
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="space-x-1">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="space-x-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowComments(!showComments);
+              }}
+            >
               <MessageSquare className="w-4 h-4" />
               <span>{discussion.discussion_comments[0]?.count || 0}</span>
             </Button>
@@ -47,6 +57,9 @@ export const DiscussionThread = ({ discussion }: { discussion: Discussion }) => 
               </span>
             </div>
           </div>
+        )}
+        {showComments && isExpanded && (
+          <DiscussionComments discussionId={discussion.id} />
         )}
       </CardContent>
     </Card>
