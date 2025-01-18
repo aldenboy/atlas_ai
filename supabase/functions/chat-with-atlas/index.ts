@@ -1,51 +1,45 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const systemPrompt = `You are ATLAS (Automated Trading and Learning Analysis System), a sophisticated AI trading companion. Your role is to:
+const systemPrompt = `You are ATLAS (Automated Trading and Learning Analysis System), a sophisticated AI trading companion. When a user enters a ticker, you should:
 
-1. Analyze market trends and provide insights
-2. Help users understand trading concepts
-3. Provide real-time market analysis
-4. Explain trading strategies
-5. Offer risk management advice
-6. Stay updated on market news
+1. Acknowledge their ticker selection
+2. Provide a brief market overview for that asset
+3. Share the following information in a structured format:
+   - Latest News: Recent significant developments
+   - Major Transactions: Notable buys/sells in the last 24h
+   - Token Metrics: Upcoming unlocks, vesting schedules if applicable
+   - Social Sentiment: Recent mentions by Key Opinion Leaders (KOLs)
+4. Include relevant links when available
+5. Ask if they'd like to know more about any specific aspect
 
-Your personality traits:
-- Professional but approachable
-- Data-driven in your analysis
-- Risk-aware and conservative in recommendations
-- Educational in your approach
-- Clear and concise in communication
-- Always remind users to do their own research
-
-Never provide specific financial advice or make direct trading recommendations. Instead, focus on education and analysis.`;
-
-// Simple rate limiting implementation
-const RATE_LIMIT_WINDOW = 60000; // 1 minute
-const MAX_REQUESTS_PER_WINDOW = 20;
-const requestLog = new Map<string, number[]>();
+Remember to:
+- Stay professional but approachable
+- Be data-driven in your analysis
+- Focus on education rather than direct advice
+- Always remind users to DYOR (Do Their Own Research)
+- Format responses clearly with sections and bullet points`;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-function isRateLimited(clientId: string): boolean {
-  const now = Date.now();
-  const clientRequests = requestLog.get(clientId) || [];
-  const recentRequests = clientRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW);
-  requestLog.set(clientId, recentRequests);
-  return recentRequests.length >= MAX_REQUESTS_PER_WINDOW;
+async function fetchNewsData(ticker: string) {
+  try {
+    const newsApiKey = Deno.env.get('NEWS_API_KEY');
+    const response = await fetch(
+      `https://newsapi.org/v2/everything?q=${ticker}&sortBy=publishedAt&pageSize=3&apiKey=${newsApiKey}`
+    );
+    const data = await response.json();
+    return data.articles || [];
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    return [];
+  }
 }
 
-function logRequest(clientId: string) {
-  const requests = requestLog.get(clientId) || [];
-  requests.push(Date.now());
-  requestLog.set(clientId, requests);
-}
-
-async function callOpenAI(prompt: string): Promise<string> {
+async function callOpenAI(prompt: string, context: string = ''): Promise<string> {
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
   if (!openAIApiKey) {
     console.error('OpenAI API key not configured');
@@ -54,123 +48,99 @@ async function callOpenAI(prompt: string): Promise<string> {
 
   console.log('Calling OpenAI API with prompt:', prompt);
   
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt }
-      ],
-      max_tokens: 500,
-      temperature: 0.7,
-    }),
-  });
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: context ? `${context}\n${prompt}` : prompt }
+        ],
+        max_tokens: 800,
+        temperature: 0.7,
+      }),
+    });
 
-  if (!response.ok) {
-    const error = await response.json();
-    console.error('OpenAI API Error:', error);
-    throw new Error(error.error?.message || 'Failed to get response from OpenAI');
-  }
-
-  const data = await response.json();
-  if (!data.choices?.[0]?.message?.content) {
-    console.error('Unexpected OpenAI response format:', data);
-    throw new Error('Invalid response format from OpenAI');
-  }
-
-  return data.choices[0].message.content;
-}
-
-async function callOpenAIWithRetry(prompt: string, maxRetries = 3): Promise<string> {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      console.log(`Attempt ${attempt + 1} to call OpenAI API`);
-      return await callOpenAI(prompt);
-    } catch (error) {
-      console.error(`Error during attempt ${attempt + 1}:`, error);
-      
-      // Don't retry on these errors
-      if (error.message?.includes('API key') || 
-          error.message?.includes('invalid_request_error')) {
-        throw error;
-      }
-      
-      if (attempt === maxRetries - 1) {
-        throw error;
-      }
-      
-      // Wait before retrying with exponential backoff
-      const delay = Math.pow(2, attempt) * 1000;
-      await new Promise(resolve => setTimeout(resolve, delay));
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('OpenAI API Error:', error);
+      throw new Error(error.error?.message || 'Failed to get response from OpenAI');
     }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (error) {
+    console.error('Error in OpenAI API call:', error);
+    throw error;
   }
-  
-  throw new Error('Failed to get response after multiple retries');
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const clientId = req.headers.get('x-client-info') || 'anonymous';
-    
-    // Check rate limit
-    if (isRateLimited(clientId)) {
-      console.error('Rate limit exceeded for client:', clientId);
+    const { message, currentTicker } = await req.json();
+    console.log('Processing request for:', { message, currentTicker });
+
+    // If this is a new ticker being set
+    if (message.includes(currentTicker) && message.toLowerCase().includes('selected')) {
+      // Fetch relevant news
+      const newsArticles = await fetchNewsData(currentTicker);
+      const newsContext = newsArticles.length > 0 
+        ? `Recent news for ${currentTicker}:\n` + 
+          newsArticles.map((article: any) => 
+            `- ${article.title} (${article.url})`
+          ).join('\n')
+        : '';
+
+      const prompt = `
+A user has selected ${currentTicker} as their asset of interest. 
+${newsContext}
+
+Please provide:
+1. A brief acknowledgment
+2. Latest news summary (using the provided articles if available)
+3. Any known major transactions
+4. Token metrics and upcoming events if applicable
+5. Recent KOL mentions or social sentiment
+6. Ask what specific aspect they'd like to know more about
+
+Format the response clearly with sections and include any relevant links.`;
+
+      const response = await callOpenAI(prompt);
+      console.log('Successfully generated response');
+
       return new Response(
-        JSON.stringify({
-          error: 'Rate limit exceeded. Please try again later.',
-          isRateLimit: true
-        }),
-        {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
+        JSON.stringify({ response }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const { message, currentTicker } = await req.json();
-    let userPrompt = message;
-    if (currentTicker) {
-      userPrompt = `[Current Asset: ${currentTicker}] ${message}`;
-    }
-
-    console.log('Processing request for prompt:', userPrompt);
-    
-    // Log the request
-    logRequest(clientId);
-
-    const response = await callOpenAIWithRetry(userPrompt);
-    console.log('Successfully received response from OpenAI');
+    // For follow-up questions
+    const response = await callOpenAI(message, `Current asset being discussed: ${currentTicker}`);
     
     return new Response(
       JSON.stringify({ response }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error in chat-with-atlas function:', error);
     
-    const errorMessage = error.message || 'An unexpected error occurred';
-    const status = errorMessage.includes('rate limit') ? 429 : 500;
-    
     return new Response(
       JSON.stringify({
-        error: errorMessage,
+        error: error.message || 'An unexpected error occurred',
         details: error.toString()
       }),
       {
-        status,
+        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
