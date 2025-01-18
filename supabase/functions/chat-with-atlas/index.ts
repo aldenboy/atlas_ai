@@ -1,11 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const systemPrompt = `You are ATLAS (Automated Trading and Learning Analysis System), a sophisticated AI trading companion. Your role is to:
 
@@ -31,6 +25,12 @@ const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 20;
 const requestLog = new Map<string, number[]>();
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 function isRateLimited(clientId: string): boolean {
   const now = Date.now();
   const clientRequests = requestLog.get(clientId) || [];
@@ -45,66 +45,72 @@ function logRequest(clientId: string) {
   requestLog.set(clientId, requests);
 }
 
-// Retry logic for OpenAI API calls
-async function callOpenAIWithRetry(prompt: string, maxRetries = 3): Promise<Response> {
+async function callOpenAI(prompt: string): Promise<string> {
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
   if (!openAIApiKey) {
+    console.error('OpenAI API key not configured');
     throw new Error('OpenAI API key not configured');
   }
 
-  let lastError;
+  console.log('Calling OpenAI API with prompt:', prompt);
+  
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt }
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    console.error('OpenAI API Error:', error);
+    throw new Error(error.error?.message || 'Failed to get response from OpenAI');
+  }
+
+  const data = await response.json();
+  if (!data.choices?.[0]?.message?.content) {
+    console.error('Unexpected OpenAI response format:', data);
+    throw new Error('Invalid response format from OpenAI');
+  }
+
+  return data.choices[0].message.content;
+}
+
+async function callOpenAIWithRetry(prompt: string, maxRetries = 3): Promise<string> {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       console.log(`Attempt ${attempt + 1} to call OpenAI API`);
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: prompt }
-          ],
-          max_tokens: 500,
-          temperature: 0.7,
-        }),
-      });
-
-      if (response.ok) {
-        return response;
-      }
-
-      const error = await response.json();
-      console.error(`OpenAI API Error (Attempt ${attempt + 1}):`, error);
-
-      // Don't retry on these errors
-      if (error.error?.type === 'invalid_request_error' ||
-          error.error?.type === 'invalid_api_key') {
-        throw new Error(error.error?.message || 'Invalid request configuration');
-      }
-
-      // Wait before retrying
-      if (attempt < maxRetries - 1) {
-        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-
-      lastError = error;
+      return await callOpenAI(prompt);
     } catch (error) {
       console.error(`Error during attempt ${attempt + 1}:`, error);
-      lastError = error;
       
-      if (attempt < maxRetries - 1) {
-        const delay = Math.pow(2, attempt) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
+      // Don't retry on these errors
+      if (error.message?.includes('API key') || 
+          error.message?.includes('invalid_request_error')) {
+        throw error;
       }
+      
+      if (attempt === maxRetries - 1) {
+        throw error;
+      }
+      
+      // Wait before retrying with exponential backoff
+      const delay = Math.pow(2, attempt) * 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
-
-  throw new Error(lastError?.error?.message || 'Service is temporarily unavailable after multiple retries');
+  
+  throw new Error('Failed to get response after multiple retries');
 }
 
 serve(async (req) => {
@@ -137,17 +143,16 @@ serve(async (req) => {
       userPrompt = `[Current Asset: ${currentTicker}] ${message}`;
     }
 
-    console.log('Sending request to OpenAI with prompt:', userPrompt);
+    console.log('Processing request for prompt:', userPrompt);
     
     // Log the request
     logRequest(clientId);
 
     const response = await callOpenAIWithRetry(userPrompt);
-    const data = await response.json();
-    console.log('Received response from OpenAI');
+    console.log('Successfully received response from OpenAI');
     
     return new Response(
-      JSON.stringify({ response: data.choices[0].message.content }),
+      JSON.stringify({ response }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
