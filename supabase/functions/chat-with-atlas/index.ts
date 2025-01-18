@@ -1,6 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 const systemPrompt = `You are ATLAS (Automated Trading and Learning Analysis System), a sophisticated AI trading companion. Your role is to:
 
 1. Analyze market trends and provide insights
@@ -20,11 +26,6 @@ Your personality traits:
 
 Never provide specific financial advice or make direct trading recommendations. Instead, focus on education and analysis.`;
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
 // Simple rate limiting implementation
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 20;
@@ -33,13 +34,8 @@ const requestLog = new Map<string, number[]>();
 function isRateLimited(clientId: string): boolean {
   const now = Date.now();
   const clientRequests = requestLog.get(clientId) || [];
-  
-  // Clean up old requests
   const recentRequests = clientRequests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW);
-  
-  // Update request log
   requestLog.set(clientId, recentRequests);
-  
   return recentRequests.length >= MAX_REQUESTS_PER_WINDOW;
 }
 
@@ -50,7 +46,7 @@ function logRequest(clientId: string) {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Always handle CORS preflight requests first
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -60,14 +56,31 @@ serve(async (req) => {
     
     // Check rate limit
     if (isRateLimited(clientId)) {
-      throw new Error('Rate limit exceeded. Please wait a moment before trying again.');
+      console.error('Rate limit exceeded for client:', clientId);
+      return new Response(
+        JSON.stringify({
+          error: 'Rate limit exceeded. Please try again later.',
+          isRateLimit: true
+        }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const { message, currentTicker } = await req.json();
-    
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    
     if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+      console.error('OpenAI API key not configured');
+      return new Response(
+        JSON.stringify({ error: 'Service configuration error. Please contact support.' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     let userPrompt = message;
@@ -76,7 +89,7 @@ serve(async (req) => {
     }
 
     console.log('Sending request to OpenAI with prompt:', userPrompt);
-
+    
     // Log the request
     logRequest(clientId);
 
@@ -87,13 +100,13 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // Using the more cost-effective model
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
         max_tokens: 500,
+        temperature: 0.7,
       }),
     });
 
@@ -101,37 +114,46 @@ serve(async (req) => {
       const error = await response.json();
       console.error('OpenAI API Error:', error);
       
+      let errorMessage = 'Failed to generate response';
       if (error.error?.message?.includes('exceeded your current quota')) {
-        throw new Error('Service is temporarily unavailable. Please try again in a few minutes.');
+        errorMessage = 'Service is temporarily unavailable. Please try again in a few minutes.';
       } else if (error.error?.message?.includes('invalid_api_key')) {
-        throw new Error('Service configuration error. Please contact support.');
+        errorMessage = 'Service configuration error. Please contact support.';
       } else {
-        throw new Error(error.error?.message || 'Failed to generate response');
+        errorMessage = error.error?.message || errorMessage;
       }
+      
+      return new Response(
+        JSON.stringify({ error: errorMessage }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const data = await response.json();
     console.log('Received response from OpenAI');
     
-    const aiResponse = data.choices[0].message.content;
+    return new Response(
+      JSON.stringify({ response: data.choices[0].message.content }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
 
-    return new Response(JSON.stringify({ response: aiResponse }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   } catch (error) {
     console.error('Error in chat-with-atlas function:', error);
     
-    // Determine if this is a rate limit error
-    const isRateLimitError = error.message?.includes('Rate limit exceeded');
-    
     return new Response(
-      JSON.stringify({ 
-        error: error.message || 'An unexpected error occurred',
-        details: error.toString(),
-        isRateLimit: isRateLimitError
-      }), {
-      status: isRateLimitError ? 429 : 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      JSON.stringify({
+        error: 'An unexpected error occurred. Please try again.',
+        details: error.toString()
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   }
 });
