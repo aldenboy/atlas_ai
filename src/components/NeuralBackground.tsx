@@ -11,9 +11,11 @@ import {
   drawConnections, 
   drawNodes 
 } from "@/utils/nodeAnimations";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const NeuralBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -24,9 +26,8 @@ export const NeuralBackground = () => {
 
     // Set canvas size
     const setSize = () => {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
     setSize();
     window.addEventListener("resize", setSize);
@@ -46,12 +47,12 @@ export const NeuralBackground = () => {
     });
 
     // Initialize nodes with adjusted parameters
-    const numNodes = 250;
-    const connectionRadius = 180;
-    const mouseRadius = 180;
+    const numNodes = isMobile ? 150 : 250; // Reduce nodes on mobile
+    const connectionRadius = isMobile ? 120 : 180;
+    const mouseRadius = isMobile ? 120 : 180;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const faceRadius = Math.min(canvas.width, canvas.height) * 0.3;
+    const faceRadius = Math.min(canvas.width, canvas.height) * (isMobile ? 0.2 : 0.3);
 
     const nodes: Node[] = [
       ...generateFaceOutlineNodes(centerX, centerY, faceRadius, numNodes),
@@ -79,13 +80,13 @@ export const NeuralBackground = () => {
       window.removeEventListener("resize", setSize);
       canvas.removeEventListener("mousemove", updateMousePosition);
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full -z-10"
-      style={{ width: '100%', height: '100%' }}
+      className="fixed inset-0 w-full h-full -z-10"
+      style={{ touchAction: 'none' }}
     />
   );
 };
