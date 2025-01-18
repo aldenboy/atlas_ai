@@ -1,6 +1,7 @@
 import React from 'react';
 import { Newspaper } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 type NewsItem = {
   id: string;
@@ -9,21 +10,12 @@ type NewsItem = {
 };
 
 const fetchNews = async () => {
-  const response = await fetch(
-    `https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=${process.env.NEWS_API_KEY}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${process.env.NEWS_API_KEY}`
-      }
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch news');
+  const { data, error } = await supabase.functions.invoke('fetch-news');
+  
+  if (error) {
+    throw error;
   }
 
-  const data = await response.json();
-  
   return data.articles.slice(0, 6).map((article: any) => ({
     id: article.url,
     text: article.title,
