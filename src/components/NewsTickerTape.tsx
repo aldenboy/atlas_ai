@@ -1,41 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Newspaper } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 type NewsItem = {
-  id: number;
+  id: string;
   text: string;
   category: 'market' | 'economy' | 'company';
 };
 
-// Mock API function - in a real app, this would fetch from a real news API
-const fetchLatestNews = (): NewsItem[] => {
-  const timestamp = new Date().toLocaleTimeString();
-  return [
-    { id: 1, text: `Fed signals potential rate cuts in 2024 (Updated ${timestamp})`, category: 'economy' },
-    { id: 2, text: `Apple announces new AI initiatives (Updated ${timestamp})`, category: 'company' },
-    { id: 3, text: `Bitcoin surges past key resistance level (Updated ${timestamp})`, category: 'market' },
-    { id: 4, text: `S&P 500 reaches new all-time high (Updated ${timestamp})`, category: 'market' },
-    { id: 5, text: `ECB maintains current monetary policy (Updated ${timestamp})`, category: 'economy' },
-    { id: 6, text: `Tesla expands operations in Asia (Updated ${timestamp})`, category: 'company' },
-  ];
+const fetchNews = async () => {
+  const response = await fetch(
+    `https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=${process.env.NEWS_API_KEY}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${process.env.NEWS_API_KEY}`
+      }
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch news');
+  }
+
+  const data = await response.json();
+  
+  return data.articles.slice(0, 6).map((article: any) => ({
+    id: article.url,
+    text: article.title,
+    category: 'market' as const
+  }));
 };
 
 export const NewsTickerTape = () => {
-  const [news, setNews] = useState<NewsItem[]>(fetchLatestNews());
+  const { data: news, error } = useQuery({
+    queryKey: ['news'],
+    queryFn: fetchNews,
+    refetchInterval: 300000, // Refresh every 5 minutes
+  });
 
-  useEffect(() => {
-    // Update news every 30 seconds
-    const interval = setInterval(() => {
-      setNews(fetchLatestNews());
-    }, 30000);
+  if (error) {
+    console.error('Error fetching news:', error);
+  }
 
-    return () => clearInterval(interval);
-  }, []);
+  const newsItems = news || [];
 
   return (
     <div className="w-full bg-purple-900/50 border-b border-purple-500/20 overflow-hidden">
       <div className="animate-[scroll_30s_linear_infinite] whitespace-nowrap inline-block">
-        {[...news, ...news].map((item, index) => (
+        {[...newsItems, ...newsItems].map((item, index) => (
           <div key={index} className="inline-block px-4 py-2">
             <span className="inline-flex items-center">
               <Newspaper className="w-4 h-4 mr-2 text-purple-400" />
