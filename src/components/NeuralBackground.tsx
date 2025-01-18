@@ -24,26 +24,34 @@ export const NeuralBackground = () => {
 
     // Set canvas size
     const setSize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
     };
     setSize();
     window.addEventListener("resize", setSize);
 
-    // Mouse position tracking
+    // Mouse position tracking with proper canvas coordinates
     const mouse: MousePosition = { x: 0, y: 0 };
-    canvas.addEventListener("mousemove", (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
+    const updateMousePosition = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    };
+    
+    canvas.addEventListener("mousemove", updateMousePosition);
+    canvas.addEventListener("mouseleave", () => {
+      mouse.x = 0;
+      mouse.y = 0;
     });
 
     // Initialize nodes with adjusted parameters
-    const numNodes = 250; // Increased number of nodes
-    const connectionRadius = 180; // Increased connection radius
-    const mouseRadius = 180; // Increased mouse interaction radius
+    const numNodes = 250;
+    const connectionRadius = 180;
+    const mouseRadius = 180;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const faceRadius = Math.min(canvas.width, canvas.height) * 0.3; // Increased face size
+    const faceRadius = Math.min(canvas.width, canvas.height) * 0.3;
 
     const nodes: Node[] = [
       ...generateFaceOutlineNodes(centerX, centerY, faceRadius, numNodes),
@@ -54,7 +62,7 @@ export const NeuralBackground = () => {
 
     // Animation loop
     const animate = () => {
-      ctx.fillStyle = "rgba(26, 31, 44, 0.2)"; // Increased opacity for better trail effect
+      ctx.fillStyle = "rgba(26, 31, 44, 0.2)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Update and draw nodes
@@ -69,6 +77,7 @@ export const NeuralBackground = () => {
 
     return () => {
       window.removeEventListener("resize", setSize);
+      canvas.removeEventListener("mousemove", updateMousePosition);
     };
   }, []);
 
@@ -76,6 +85,7 @@ export const NeuralBackground = () => {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-full -z-10"
+      style={{ width: '100%', height: '100%' }}
     />
   );
 };
