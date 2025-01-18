@@ -18,17 +18,18 @@ export const NewTradeForm = ({ onClose }: { onClose: () => void }) => {
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      symbol: formData.get("symbol"),
-      entry_price: parseFloat(formData.get("entry_price") as string),
-      position_size: parseFloat(formData.get("position_size") as string),
-      strategy: formData.get("strategy"),
-      notes: formData.get("notes"),
+      symbol: String(formData.get("symbol")),
+      entry_price: parseFloat(String(formData.get("entry_price"))),
+      position_size: parseFloat(String(formData.get("position_size"))),
+      strategy: String(formData.get("strategy")),
+      notes: String(formData.get("notes")),
+      user_id: (await supabase.auth.getUser()).data.user?.id
     };
 
     try {
       const { error } = await supabase
         .from("trading_journal")
-        .insert([data]);
+        .insert(data);
 
       if (error) throw error;
 

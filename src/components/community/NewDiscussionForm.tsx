@@ -26,15 +26,16 @@ export const NewDiscussionForm = ({ onClose }: { onClose: () => void }) => {
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      title: formData.get("title"),
-      content: formData.get("content"),
+      title: String(formData.get("title")),
+      content: String(formData.get("content")),
       category,
+      user_id: (await supabase.auth.getUser()).data.user?.id
     };
 
     try {
       const { error } = await supabase
         .from("discussions")
-        .insert([data]);
+        .insert(data);
 
       if (error) throw error;
 
