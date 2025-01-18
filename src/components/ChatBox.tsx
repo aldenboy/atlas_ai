@@ -6,7 +6,10 @@ import { Send } from "lucide-react";
 export const ChatBox = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([
-    { text: "Hello! How can I assist you today?", isUser: false },
+    { 
+      text: "Hello! I'm ATLAS (Automated Trading and Learning Analysis System), your AI trading companion. How can I assist you with market research and analysis today?", 
+      isUser: false 
+    },
   ]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -20,13 +23,17 @@ export const ChatBox = () => {
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
-        { text: "I'm processing your request...", isUser: false },
+        { text: "I'm analyzing your request...", isUser: false },
       ]);
     }, 1000);
   };
 
   return (
     <div className="w-full h-[100dvh] md:h-[500px] flex flex-col bg-black/30 backdrop-blur-md rounded-lg shadow-xl overflow-hidden border border-purple-500/20">
+      <div className="bg-purple-900/30 p-4 border-b border-purple-500/20">
+        <h1 className="text-2xl font-bold text-white">ATLAS</h1>
+        <p className="text-purple-200/70 text-sm">Automated Trading and Learning Analysis System</p>
+      </div>
       <div className="flex-1 p-4 overflow-y-auto">
         {messages.map((msg, index) => (
           <div
@@ -50,7 +57,7 @@ export const ChatBox = () => {
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your message..."
+            placeholder="Ask ATLAS about market research..."
             className="flex-1 bg-white/5 border-purple-500/30 text-white placeholder:text-purple-300/50 focus-visible:ring-purple-500/50"
           />
           <Button 
