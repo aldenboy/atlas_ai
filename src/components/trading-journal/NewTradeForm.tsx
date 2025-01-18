@@ -21,17 +21,21 @@ export const NewTradeForm = ({ onClose }: { onClose: () => void }) => {
       symbol: String(formData.get("symbol")),
       entry_price: parseFloat(String(formData.get("entry_price"))),
       position_size: parseFloat(String(formData.get("position_size"))),
-      strategy: String(formData.get("strategy")),
-      notes: String(formData.get("notes")),
+      strategy: String(formData.get("strategy")) || null,
+      notes: String(formData.get("notes")) || null,
+      trade_date: new Date().toISOString(),
       user_id: (await supabase.auth.getUser()).data.user?.id
     };
 
     try {
       const { error } = await supabase
         .from("trading_journal")
-        .insert(data);
+        .insert([data]);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error inserting trade:", error);
+        throw error;
+      }
 
       toast({
         title: "Trade Added",
@@ -41,9 +45,10 @@ export const NewTradeForm = ({ onClose }: { onClose: () => void }) => {
       queryClient.invalidateQueries({ queryKey: ["tradingJournal"] });
       onClose();
     } catch (error) {
+      console.error("Error in handleSubmit:", error);
       toast({
         title: "Error",
-        description: "Failed to add trade. Please try again.",
+        description: "Failed to add trade. Please make sure you're logged in and try again.",
         variant: "destructive",
       });
     } finally {
