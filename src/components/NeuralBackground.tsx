@@ -37,13 +37,13 @@ export const NeuralBackground = () => {
       mouse.y = e.clientY;
     });
 
-    // Initialize nodes
-    const numNodes = 200;
-    const connectionRadius = 150;
-    const mouseRadius = 150;
+    // Initialize nodes with adjusted parameters
+    const numNodes = 250; // Increased number of nodes
+    const connectionRadius = 180; // Increased connection radius
+    const mouseRadius = 180; // Increased mouse interaction radius
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const faceRadius = Math.min(canvas.width, canvas.height) * 0.25;
+    const faceRadius = Math.min(canvas.width, canvas.height) * 0.3; // Increased face size
 
     const nodes: Node[] = [
       ...generateFaceOutlineNodes(centerX, centerY, faceRadius, numNodes),
@@ -54,7 +54,7 @@ export const NeuralBackground = () => {
 
     // Animation loop
     const animate = () => {
-      ctx.fillStyle = "rgba(26, 31, 44, 0.1)";
+      ctx.fillStyle = "rgba(26, 31, 44, 0.2)"; // Increased opacity for better trail effect
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Update and draw nodes
