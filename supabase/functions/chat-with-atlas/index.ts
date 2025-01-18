@@ -74,13 +74,7 @@ serve(async (req) => {
     
     if (!openAIApiKey) {
       console.error('OpenAI API key not configured');
-      return new Response(
-        JSON.stringify({ error: 'Service configuration error. Please contact support.' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      throw new Error('Service configuration error. Please contact support.');
     }
 
     let userPrompt = message;
@@ -114,22 +108,17 @@ serve(async (req) => {
       const error = await response.json();
       console.error('OpenAI API Error:', error);
       
-      let errorMessage = 'Failed to generate response';
-      if (error.error?.message?.includes('exceeded your current quota')) {
-        errorMessage = 'Service is temporarily unavailable. Please try again in a few minutes.';
-      } else if (error.error?.message?.includes('invalid_api_key')) {
-        errorMessage = 'Service configuration error. Please contact support.';
-      } else {
-        errorMessage = error.error?.message || errorMessage;
+      // Handle specific OpenAI error cases
+      if (error.error?.type === 'insufficient_quota' || 
+          error.error?.message?.includes('exceeded your current quota')) {
+        throw new Error('Service is temporarily unavailable. Please try again in a few minutes.');
+      } else if (error.error?.type === 'invalid_request_error') {
+        throw new Error('Invalid request. Please try again with different parameters.');
+      } else if (error.error?.type === 'rate_limit_exceeded') {
+        throw new Error('Service is busy. Please try again in a few moments.');
       }
       
-      return new Response(
-        JSON.stringify({ error: errorMessage }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      throw new Error(error.error?.message || 'Failed to generate response');
     }
 
     const data = await response.json();
@@ -145,13 +134,16 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in chat-with-atlas function:', error);
     
+    const errorMessage = error.message || 'An unexpected error occurred';
+    const status = error.message?.includes('rate limit') ? 429 : 500;
+    
     return new Response(
       JSON.stringify({
-        error: 'An unexpected error occurred. Please try again.',
+        error: errorMessage,
         details: error.toString()
       }),
       {
-        status: 500,
+        status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
