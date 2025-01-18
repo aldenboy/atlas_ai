@@ -37,7 +37,10 @@ export const ChatBox = () => {
           }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase function error:', error);
+          throw new Error(error.message || 'Failed to get response from ATLAS');
+        }
 
         setMessages((prev) => [
           ...prev,
@@ -48,25 +51,43 @@ export const ChatBox = () => {
           body: { message, currentTicker }
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase function error:', error);
+          throw new Error(error.message || 'Failed to get response from ATLAS');
+        }
 
         setMessages((prev) => [
           ...prev,
           { text: data.response, isUser: false }
         ]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error calling ATLAS:', error);
+      
+      // Extract the error message from the response if available
+      let errorMessage = 'Failed to get response from ATLAS. Please try again.';
+      try {
+        if (error.message && typeof error.message === 'string') {
+          const errorBody = JSON.parse(error.message);
+          if (errorBody.error) {
+            errorMessage = errorBody.error;
+          }
+        }
+      } catch {
+        // If parsing fails, use the original error message
+        errorMessage = error.message || errorMessage;
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to get response from ATLAS. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
       
       setMessages((prev) => [
         ...prev,
         { 
-          text: "I apologize, but I encountered an error processing your request. Please try again.", 
+          text: "I apologize, but I encountered an error processing your request. Please try again in a moment.", 
           isUser: false 
         }
       ]);

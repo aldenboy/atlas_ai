@@ -44,6 +44,8 @@ serve(async (req) => {
       userPrompt = `[Current Asset: ${currentTicker}] ${message}`;
     }
 
+    console.log('Sending request to OpenAI with prompt:', userPrompt);
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -57,15 +59,27 @@ serve(async (req) => {
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.7,
+        max_tokens: 500, // Add a token limit to control costs
       }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error?.message || 'Failed to generate response');
+      console.error('OpenAI API Error:', error);
+      
+      // Check for specific error types
+      if (error.error?.message?.includes('exceeded your current quota')) {
+        throw new Error('API rate limit exceeded. Please try again later.');
+      } else if (error.error?.message?.includes('invalid_api_key')) {
+        throw new Error('Invalid API key configuration. Please check your settings.');
+      } else {
+        throw new Error(error.error?.message || 'Failed to generate response');
+      }
     }
 
     const data = await response.json();
+    console.log('Received response from OpenAI');
+    
     const aiResponse = data.choices[0].message.content;
 
     return new Response(JSON.stringify({ response: aiResponse }), {
@@ -73,7 +87,11 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in chat-with-atlas function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(
+      JSON.stringify({ 
+        error: error.message || 'An unexpected error occurred',
+        details: error.toString()
+      }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
