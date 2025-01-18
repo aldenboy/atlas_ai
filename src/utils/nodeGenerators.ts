@@ -1,5 +1,7 @@
 import { Node } from "@/types/neural";
 
+const PHI = (1 + Math.sqrt(5)) / 2; // Golden ratio
+
 export const generateFaceOutlineNodes = (
   centerX: number,
   centerY: number,
@@ -7,20 +9,20 @@ export const generateFaceOutlineNodes = (
   numNodes: number
 ): Node[] => {
   const nodes: Node[] = [];
-  // Create skull outline with more angular shape
+  const turns = 5; // Number of spiral turns
+  
   for (let i = 0; i < numNodes * 0.4; i++) {
-    const angle = (i / (numNodes * 0.4)) * Math.PI * 2;
-    // Make top of skull more pronounced
-    const radiusModifier = angle > Math.PI ? 1.2 : 1.4;
-    const x = centerX + Math.cos(angle) * faceRadius * radiusModifier;
-    const y = centerY + Math.sin(angle) * faceRadius * (angle > Math.PI ? 1.4 : 1.2);
+    const theta = i * (2 * Math.PI) / (numNodes * 0.4);
+    const radius = faceRadius * Math.pow(PHI, -theta / (2 * Math.PI));
+    const x = centerX + radius * Math.cos(theta);
+    const y = centerY + radius * Math.sin(theta);
     
     nodes.push({
       x,
       y,
       vx: (Math.random() - 0.5) * 0.2,
       vy: (Math.random() - 0.5) * 0.2,
-      radius: Math.random() * 2 + 2, // Larger nodes for better visibility
+      radius: Math.random() * 2 + 2,
     });
   }
   return nodes;
@@ -35,19 +37,18 @@ export const generateEyeNodes = (
   const eyeOffset = faceRadius * 0.35;
   const eyeY = centerY - faceRadius * 0.1;
   
-  // Create more angular, skull-like eye sockets
   [-1, 1].forEach(side => {
-    for (let i = 0; i < 20; i++) {
-      const angle = (i / 20) * Math.PI * 2;
-      const r = 20; // Larger eye sockets
-      const x = centerX + side * eyeOffset + Math.cos(angle) * r;
-      const y = eyeY + Math.sin(angle) * (r * 0.8); // Slightly oval shaped
+    for (let i = 0; i < 15; i++) {
+      const theta = i * (2 * Math.PI) / 15;
+      const radius = 15 * Math.pow(PHI, -theta / (2 * Math.PI));
+      const x = centerX + side * eyeOffset + radius * Math.cos(theta);
+      const y = eyeY + radius * Math.sin(theta);
       nodes.push({
         x,
         y,
         vx: (Math.random() - 0.5) * 0.2,
         vy: (Math.random() - 0.5) * 0.2,
-        radius: Math.random() * 2 + 2.5, // Larger nodes for visibility
+        radius: Math.random() * 2 + 2,
       });
     }
   });
@@ -63,12 +64,12 @@ export const generateMouthNodes = (
   const mouthWidth = faceRadius * 0.5;
   const mouthY = centerY + faceRadius * 0.3;
   
-  // Create a more angular mouth shape resembling a skull
-  for (let i = 0; i < 25; i++) {
-    const t = i / 24;
-    const x = centerX + (t - 0.5) * mouthWidth;
-    // Create a more angular smile shape
-    const y = mouthY + Math.abs(Math.sin(t * Math.PI)) * 25;
+  for (let i = 0; i < 20; i++) {
+    const t = i / 19;
+    const theta = t * Math.PI;
+    const radius = 25 * Math.pow(PHI, -theta / Math.PI);
+    const x = centerX + radius * Math.cos(theta);
+    const y = mouthY + radius * Math.sin(theta);
     nodes.push({
       x,
       y,
@@ -88,11 +89,13 @@ export const generateRandomNodes = (
 ): Node[] => {
   const nodes: Node[] = [];
   for (let i = 0; i < numNodes * 0.3; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const radius = Math.random() * faceRadius * 1.2;
+    const theta = i * (2 * Math.PI) / (numNodes * 0.3);
+    const radius = faceRadius * Math.pow(PHI, -theta / (2 * Math.PI)) * Math.random();
+    const x = centerX + radius * Math.cos(theta);
+    const y = centerY + radius * Math.sin(theta);
     nodes.push({
-      x: centerX + Math.cos(angle) * radius,
-      y: centerY + Math.sin(angle) * radius,
+      x,
+      y,
       vx: (Math.random() - 0.5) * 0.3,
       vy: (Math.random() - 0.5) * 0.3,
       radius: Math.random() * 1.5 + 1.5,
