@@ -33,47 +33,81 @@ export const NeuralBackground = () => {
       vy: number;
       radius: number;
     }[] = [];
-    const numNodes = 150; // Increased number of nodes
-    const connectionRadius = 200;
+    const numNodes = 200; // Increased number of nodes
+    const connectionRadius = 150;
     const mouseRadius = 150;
 
-    // Initialize nodes in a face-like pattern
+    // Initialize nodes in a more defined face pattern
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const faceRadius = Math.min(canvas.width, canvas.height) * 0.3;
+    const faceRadius = Math.min(canvas.width, canvas.height) * 0.25;
 
-    for (let i = 0; i < numNodes; i++) {
-      const angle = (i / numNodes) * Math.PI * 2;
+    // Face outline nodes
+    for (let i = 0; i < numNodes * 0.4; i++) {
+      const angle = (i / (numNodes * 0.4)) * Math.PI * 2;
       // Create an oval shape for the face
       const x = centerX + Math.cos(angle) * faceRadius * 1.2;
-      const y = centerY + Math.sin(angle) * faceRadius;
+      const y = centerY + Math.sin(angle) * faceRadius * 1.4; // Made face more oval
       
       nodes.push({
         x,
         y,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        radius: Math.random() * 2 + 1,
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: (Math.random() - 0.5) * 0.2,
+        radius: Math.random() * 2 + 1.5,
       });
     }
 
-    // Add some nodes for eyes
-    const eyeOffset = faceRadius * 0.3;
+    // Eyes (two clusters of nodes)
+    const eyeOffset = faceRadius * 0.35;
+    const eyeY = centerY - faceRadius * 0.1;
     [-1, 1].forEach(side => {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 15; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const r = Math.random() * 15;
         nodes.push({
-          x: centerX + side * eyeOffset + (Math.random() - 0.5) * 30,
-          y: centerY - faceRadius * 0.1 + (Math.random() - 0.5) * 30,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
-          radius: Math.random() * 2 + 1,
+          x: centerX + side * eyeOffset + Math.cos(angle) * r,
+          y: eyeY + Math.sin(angle) * r,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2,
+          radius: Math.random() * 2 + 2,
         });
       }
     });
 
+    // Mouth (curved line of nodes)
+    const mouthWidth = faceRadius * 0.6;
+    const mouthY = centerY + faceRadius * 0.2;
+    for (let i = 0; i < 20; i++) {
+      const t = i / 19;
+      const x = centerX + (t - 0.5) * mouthWidth;
+      // Curved smile using quadratic function
+      const y = mouthY + Math.sin(t * Math.PI) * 20;
+      nodes.push({
+        x,
+        y,
+        vx: (Math.random() - 0.5) * 0.2,
+        vy: (Math.random() - 0.5) * 0.2,
+        radius: Math.random() * 2 + 1.5,
+      });
+    }
+
+    // Add some random nodes for neural network effect
+    for (let i = 0; i < numNodes * 0.3; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * faceRadius * 1.5;
+      nodes.push({
+        x: centerX + Math.cos(angle) * radius,
+        y: centerY + Math.sin(angle) * radius,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        radius: Math.random() * 1.5 + 1,
+      });
+    }
+
     // Animation
     const animate = () => {
-      ctx.fillStyle = "rgba(26, 31, 44, 0.1)"; // Slightly transparent background
+      ctx.fillStyle = "rgba(26, 31, 44, 0.1)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // Update and draw nodes
