@@ -18,17 +18,35 @@ export const NeuralBackground = () => {
     setSize();
     window.addEventListener("resize", setSize);
 
-    // Neural network nodes
-    const nodes: { x: number; y: number; vx: number; vy: number }[] = [];
-    const numNodes = 50;
+    // Mouse position tracking
+    let mouse = { x: 0, y: 0 };
+    canvas.addEventListener("mousemove", (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
 
-    // Initialize nodes
+    // Neural network nodes
+    const nodes: {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      radius: number;
+    }[] = [];
+    const numNodes = 100;
+    const connectionRadius = 200; // Maximum distance for node connections
+    const mouseRadius = 150; // Radius of mouse influence
+
+    // Initialize nodes in a spherical pattern
     for (let i = 0; i < numNodes; i++) {
+      const angle = (i / numNodes) * Math.PI * 2;
+      const radius = Math.random() * 200 + 100; // Vary the radius for a more natural look
       nodes.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+        x: canvas.width / 2 + Math.cos(angle) * radius,
+        y: canvas.height / 2 + Math.sin(angle) * radius,
         vx: (Math.random() - 0.5) * 0.5,
         vy: (Math.random() - 0.5) * 0.5,
+        radius: Math.random() * 2 + 1,
       });
     }
 
@@ -39,13 +57,34 @@ export const NeuralBackground = () => {
 
       // Update and draw nodes
       nodes.forEach((node, i) => {
-        // Update position
+        // Mouse interaction
+        const dx = mouse.x - node.x;
+        const dy = mouse.y - node.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < mouseRadius) {
+          const force = (mouseRadius - distance) / mouseRadius;
+          node.vx -= (dx / distance) * force * 0.2;
+          node.vy -= (dy / distance) * force * 0.2;
+        }
+
+        // Update position with boundaries
         node.x += node.vx;
         node.y += node.vy;
 
-        // Bounce off walls
-        if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
-        if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+        // Keep nodes within canvas bounds with smooth transition
+        if (node.x < 0 || node.x > canvas.width) {
+          node.vx *= -0.5;
+          node.x = Math.max(0, Math.min(canvas.width, node.x));
+        }
+        if (node.y < 0 || node.y > canvas.height) {
+          node.vy *= -0.5;
+          node.y = Math.max(0, Math.min(canvas.height, node.y));
+        }
+
+        // Apply friction
+        node.vx *= 0.99;
+        node.vy *= 0.99;
 
         // Draw connections
         nodes.forEach((otherNode, j) => {
@@ -54,18 +93,20 @@ export const NeuralBackground = () => {
           const dy = otherNode.y - node.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 150) {
+          if (distance < connectionRadius) {
+            const opacity = (1 - distance / connectionRadius) * 0.5;
             ctx.beginPath();
             ctx.moveTo(node.x, node.y);
             ctx.lineTo(otherNode.x, otherNode.y);
-            ctx.strokeStyle = `rgba(155, 135, 245, ${1 - distance / 150})`; // Purple lines
+            ctx.strokeStyle = `rgba(155, 135, 245, ${opacity})`; // Purple lines
+            ctx.lineWidth = opacity;
             ctx.stroke();
           }
         });
 
         // Draw node
         ctx.beginPath();
-        ctx.arc(node.x, node.y, 2, 0, Math.PI * 2);
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
         ctx.fillStyle = "#9b87f5"; // Primary Purple
         ctx.fill();
       });
