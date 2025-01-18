@@ -6,34 +6,39 @@ export const updateNodePosition = (
   mouseRadius: number,
   canvas: HTMLCanvasElement
 ) => {
-  // Mouse interaction with stronger repulsion
+  // Enhanced mouse interaction with stronger repulsion and attraction
   const dx = mouse.x - node.x;
   const dy = mouse.y - node.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
 
   if (distance < mouseRadius) {
     const force = (mouseRadius - distance) / mouseRadius;
-    node.vx -= (dx / distance) * force * 0.4; // Increased repulsion
-    node.vy -= (dy / distance) * force * 0.4;
+    // Create a swirling effect around the cursor
+    const angle = Math.atan2(dy, dx);
+    node.vx += Math.cos(angle + Math.PI / 2) * force * 0.8;
+    node.vy += Math.sin(angle + Math.PI / 2) * force * 0.8;
+    // Add slight attraction to prevent nodes from flying too far
+    node.vx += (dx / distance) * force * 0.2;
+    node.vy += (dy / distance) * force * 0.2;
   }
 
-  // Update position
+  // Update position with enhanced dynamics
   node.x += node.vx;
   node.y += node.vy;
 
-  // Boundary checks with stronger bounce
+  // Improved boundary checks with elastic bounce
   if (node.x < 0 || node.x > canvas.width) {
-    node.vx *= -0.8;
+    node.vx *= -0.9;
     node.x = Math.max(0, Math.min(canvas.width, node.x));
   }
   if (node.y < 0 || node.y > canvas.height) {
-    node.vy *= -0.8;
+    node.vy *= -0.9;
     node.y = Math.max(0, Math.min(canvas.height, node.y));
   }
 
-  // Apply friction
-  node.vx *= 0.98;
-  node.vy *= 0.98;
+  // Enhanced friction for smoother movement
+  node.vx *= 0.95;
+  node.vy *= 0.95;
 };
 
 export const drawConnections = (
@@ -49,12 +54,13 @@ export const drawConnections = (
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance < connectionRadius) {
-        const opacity = (1 - distance / connectionRadius) * 0.8; // Increased opacity
+        // Enhanced line opacity and thickness based on distance
+        const opacity = Math.pow(1 - distance / connectionRadius, 2) * 0.8;
         ctx.beginPath();
         ctx.moveTo(node.x, node.y);
         ctx.lineTo(otherNode.x, otherNode.y);
-        ctx.strokeStyle = `rgba(155, 135, 245, ${opacity})`; // Kept the purple color for contrast
-        ctx.lineWidth = opacity * 1.5; // Thicker lines
+        ctx.strokeStyle = `rgba(155, 135, 245, ${opacity})`;
+        ctx.lineWidth = opacity * 2; // Thicker lines for better visibility
         ctx.stroke();
       }
     });
@@ -65,7 +71,14 @@ export const drawNodes = (ctx: CanvasRenderingContext2D, nodes: Node[]) => {
   nodes.forEach(node => {
     ctx.beginPath();
     ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-    ctx.fillStyle = "#9b87f5"; // Kept the purple color for contrast
+    // Add a subtle glow effect
+    const gradient = ctx.createRadialGradient(
+      node.x, node.y, 0,
+      node.x, node.y, node.radius * 2
+    );
+    gradient.addColorStop(0, '#9b87f5');
+    gradient.addColorStop(1, 'rgba(155, 135, 245, 0)');
+    ctx.fillStyle = gradient;
     ctx.fill();
   });
 };
