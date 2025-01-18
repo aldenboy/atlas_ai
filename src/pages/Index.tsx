@@ -3,9 +3,11 @@ import { NeuralBackground } from "@/components/NeuralBackground";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] flex items-center justify-center p-4 relative">
       <NeuralBackground />
-      <ChatBox />
+      <div className="w-full max-w-2xl mx-auto">
+        <ChatBox />
+      </div>
     </div>
   );
 };

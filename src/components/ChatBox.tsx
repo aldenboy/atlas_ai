@@ -26,8 +26,8 @@ export const ChatBox = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto bg-black/30 backdrop-blur-md rounded-lg shadow-xl overflow-hidden border border-purple-500/20">
-      <div className="h-[500px] p-4 overflow-y-auto">
+    <div className="w-full h-[100dvh] md:h-[500px] flex flex-col bg-black/30 backdrop-blur-md rounded-lg shadow-xl overflow-hidden border border-purple-500/20">
+      <div className="flex-1 p-4 overflow-y-auto">
         {messages.map((msg, index) => (
           <div
             key={index}
