@@ -33,10 +33,6 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-  };
-
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
@@ -55,11 +51,11 @@ const Index = () => {
         </Button>
       </div>
       
-      <div className="flex-1 container mx-auto mt-16 mb-16 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-6">
+      <div className="flex-1 container mx-auto mt-16 mb-16 flex flex-col gap-6">
+        <div className="max-w-3xl mx-auto w-full">
           <ChatBox />
         </div>
-        <div className="space-y-6">
+        <div className="w-full">
           <DiscussionForum />
         </div>
       </div>
