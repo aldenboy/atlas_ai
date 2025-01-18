@@ -45,8 +45,70 @@ function logRequest(clientId: string) {
   requestLog.set(clientId, requests);
 }
 
+// Retry logic for OpenAI API calls
+async function callOpenAIWithRetry(prompt: string, maxRetries = 3): Promise<Response> {
+  const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+  if (!openAIApiKey) {
+    throw new Error('OpenAI API key not configured');
+  }
+
+  let lastError;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      console.log(`Attempt ${attempt + 1} to call OpenAI API`);
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+      });
+
+      if (response.ok) {
+        return response;
+      }
+
+      const error = await response.json();
+      console.error(`OpenAI API Error (Attempt ${attempt + 1}):`, error);
+
+      // Don't retry on these errors
+      if (error.error?.type === 'invalid_request_error' ||
+          error.error?.type === 'invalid_api_key') {
+        throw new Error(error.error?.message || 'Invalid request configuration');
+      }
+
+      // Wait before retrying
+      if (attempt < maxRetries - 1) {
+        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+
+      lastError = error;
+    } catch (error) {
+      console.error(`Error during attempt ${attempt + 1}:`, error);
+      lastError = error;
+      
+      if (attempt < maxRetries - 1) {
+        const delay = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw new Error(lastError?.error?.message || 'Service is temporarily unavailable after multiple retries');
+}
+
 serve(async (req) => {
-  // Always handle CORS preflight requests first
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -70,13 +132,6 @@ serve(async (req) => {
     }
 
     const { message, currentTicker } = await req.json();
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    
-    if (!openAIApiKey) {
-      console.error('OpenAI API key not configured');
-      throw new Error('Service configuration error. Please contact support.');
-    }
-
     let userPrompt = message;
     if (currentTicker) {
       userPrompt = `[Current Asset: ${currentTicker}] ${message}`;
@@ -87,40 +142,7 @@ serve(async (req) => {
     // Log the request
     logRequest(clientId);
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('OpenAI API Error:', error);
-      
-      // Handle specific OpenAI error cases
-      if (error.error?.type === 'insufficient_quota' || 
-          error.error?.message?.includes('exceeded your current quota')) {
-        throw new Error('Service is temporarily unavailable. Please try again in a few minutes.');
-      } else if (error.error?.type === 'invalid_request_error') {
-        throw new Error('Invalid request. Please try again with different parameters.');
-      } else if (error.error?.type === 'rate_limit_exceeded') {
-        throw new Error('Service is busy. Please try again in a few moments.');
-      }
-      
-      throw new Error(error.error?.message || 'Failed to generate response');
-    }
-
+    const response = await callOpenAIWithRetry(userPrompt);
     const data = await response.json();
     console.log('Received response from OpenAI');
     
@@ -135,7 +157,7 @@ serve(async (req) => {
     console.error('Error in chat-with-atlas function:', error);
     
     const errorMessage = error.message || 'An unexpected error occurred';
-    const status = error.message?.includes('rate limit') ? 429 : 500;
+    const status = errorMessage.includes('rate limit') ? 429 : 500;
     
     return new Response(
       JSON.stringify({
