@@ -114,6 +114,107 @@ export type Database = {
           },
         ]
       }
+      discussion_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          discussion_id: string | null
+          id: string
+          likes: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          discussion_id?: string | null
+          id?: string
+          likes?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          discussion_id?: string | null
+          id?: string
+          likes?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_comments_discussion_id_fkey"
+            columns: ["discussion_id"]
+            isOneToOne: false
+            referencedRelation: "discussions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discussions: {
+        Row: {
+          category: string
+          content: string
+          created_at: string | null
+          id: string
+          likes: number | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string | null
+          id?: string
+          likes?: number | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          likes?: number | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      market_sentiment: {
+        Row: {
+          created_at: string | null
+          id: string
+          news_sentiment: number | null
+          sentiment_score: number
+          social_mentions: number | null
+          symbol: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          news_sentiment?: number | null
+          sentiment_score: number
+          social_mentions?: number | null
+          symbol: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          news_sentiment?: number | null
+          sentiment_score?: number
+          social_mentions?: number | null
+          symbol?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       news_articles: {
         Row: {
           bearish_votes: number | null
@@ -147,6 +248,51 @@ export type Database = {
           title?: string
           url?: string
           votes?: number | null
+        }
+        Relationships: []
+      }
+      trading_journal: {
+        Row: {
+          created_at: string | null
+          entry_price: number
+          exit_price: number | null
+          id: string
+          notes: string | null
+          position_size: number
+          screenshot_url: string | null
+          strategy: string | null
+          symbol: string
+          trade_date: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entry_price: number
+          exit_price?: number | null
+          id?: string
+          notes?: string | null
+          position_size: number
+          screenshot_url?: string | null
+          strategy?: string | null
+          symbol: string
+          trade_date?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entry_price?: number
+          exit_price?: number | null
+          id?: string
+          notes?: string | null
+          position_size?: number
+          screenshot_url?: string | null
+          strategy?: string | null
+          symbol?: string
+          trade_date?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
