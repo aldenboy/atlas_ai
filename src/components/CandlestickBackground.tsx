@@ -25,7 +25,7 @@ export const CandlestickBackground = () => {
       width: number;
       height: number;
       wickHeight: number;
-      isGreen: boolean;
+      isUp: boolean;
       speed: number;
     }[] = [];
 
@@ -41,7 +41,7 @@ export const CandlestickBackground = () => {
           width: 20,
           height: 40 + Math.random() * 60,
           wickHeight: 60 + Math.random() * 80,
-          isGreen: Math.random() > 0.5,
+          isUp: Math.random() > 0.5,
           speed: 0.5 + Math.random() * 1.5
         });
       }
@@ -59,15 +59,15 @@ export const CandlestickBackground = () => {
         // Reset position when it goes off screen
         if (candle.y + candle.wickHeight < 0) {
           candle.y = canvas.height;
-          candle.isGreen = Math.random() > 0.5;
+          candle.isUp = Math.random() > 0.5;
           candle.height = 40 + Math.random() * 60;
           candle.wickHeight = 60 + Math.random() * 80;
         }
 
         // Draw candlestick
         ctx.beginPath();
-        ctx.strokeStyle = candle.isGreen ? '#00ff00' : '#ff0000';
-        ctx.fillStyle = candle.isGreen ? 'rgba(0, 255, 0, 0.2)' : 'rgba(255, 0, 0, 0.2)';
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         
         // Draw wick
         ctx.moveTo(candle.x + candle.width / 2, candle.y);
