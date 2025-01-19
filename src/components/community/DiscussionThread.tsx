@@ -14,6 +14,11 @@ interface Discussion {
   likes: number;
   created_at: string;
   user_id: string;
+  user: {
+    profile: {
+      username: string;
+    };
+  };
   discussion_comments: { count: number }[];
 }
 
@@ -48,6 +53,8 @@ export const DiscussionThread = ({ discussion }: { discussion: Discussion }) => 
                 <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                   {discussion.category}
                 </span>
+                <span>•</span>
+                <span>Posted by {discussion.user?.profile?.username}</span>
                 <span>•</span>
                 <span>
                   {formatDistance(new Date(discussion.created_at), new Date(), { addSuffix: true })}

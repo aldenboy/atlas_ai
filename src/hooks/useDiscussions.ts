@@ -14,7 +14,9 @@ export const useDiscussions = (sortBy: SortOption, limit?: number) => {
         .select(`
           *,
           discussion_comments (count),
-          profiles (username)
+          user:user_id (
+            profile:profiles!profiles_id_fkey (username)
+          )
         `);
 
       switch (sortBy) {
