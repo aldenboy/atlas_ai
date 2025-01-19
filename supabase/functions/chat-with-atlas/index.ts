@@ -7,22 +7,46 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Map common ticker symbols to CoinGecko IDs
+const tickerToGeckoId: { [key: string]: string } = {
+  'BTC': 'bitcoin',
+  'ETH': 'ethereum',
+  'SOL': 'solana',
+  'XRP': 'ripple',
+  // Add more mappings as needed
+};
+
 async function fetchTokenData(ticker: string) {
   try {
+    // Convert ticker to CoinGecko ID
+    const geckoId = tickerToGeckoId[ticker.toUpperCase()] || ticker.toLowerCase();
+    console.log('Fetching data for CoinGecko ID:', geckoId);
+
     // Fetch from CoinGecko API
     const response = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${ticker.toLowerCase()}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true`
+      `https://api.coingecko.com/api/v3/simple/price?ids=${geckoId}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true`
     );
-    const data = await response.json();
     
-    // Get the first result
-    const tokenData = Object.values(data)[0] as any;
+    if (!response.ok) {
+      console.error('CoinGecko API error:', await response.text());
+      return null;
+    }
+
+    const data = await response.json();
+    console.log('CoinGecko response:', data);
+    
+    // Get the token data
+    const tokenData = data[geckoId];
+    if (!tokenData) {
+      console.error('No data found for token:', geckoId);
+      return null;
+    }
     
     return {
-      currentPrice: tokenData?.usd || 'N/A',
-      marketCap: tokenData?.usd_market_cap || 'N/A',
-      volume24h: tokenData?.usd_24h_vol || 'N/A',
-      priceChange24h: tokenData?.usd_24h_change || 'N/A'
+      currentPrice: tokenData.usd || 'N/A',
+      marketCap: tokenData.usd_market_cap || 'N/A',
+      volume24h: tokenData.usd_24h_vol || 'N/A',
+      priceChange24h: tokenData.usd_24h_change || 'N/A'
     };
   } catch (error) {
     console.error('Error fetching token data:', error);
@@ -169,11 +193,21 @@ async function callOpenAI(prompt: string, context: string = '', marketData: any 
 
   let enhancedPrompt = prompt;
   if (marketData) {
+    const formatNumber = (num: number) => {
+      if (num >= 1e9) {
+        return `$${(num / 1e9).toFixed(2)}B`;
+      } else if (num >= 1e6) {
+        return `$${(num / 1e6).toFixed(2)}M`;
+      } else {
+        return `$${num.toLocaleString()}`;
+      }
+    };
+
     enhancedPrompt += `\n\nCurrent Market Data:\n` +
-      `- Price: $${marketData.currentPrice}\n` +
-      `- Market Cap: $${marketData.marketCap}\n` +
-      `- 24h Volume: $${marketData.volume24h}\n` +
-      `- 24h Price Change: ${marketData.priceChange24h}%`;
+      `- Price: $${Number(marketData.currentPrice).toLocaleString()}\n` +
+      `- Market Cap: ${formatNumber(marketData.marketCap)}\n` +
+      `- 24h Volume: ${formatNumber(marketData.volume24h)}\n` +
+      `- 24h Price Change: ${marketData.priceChange24h.toFixed(2)}%`;
   }
 
   console.log('Calling OpenAI API with prompt:', enhancedPrompt);
@@ -243,6 +277,18 @@ serve(async (req) => {
       // Fetch current market data
       const marketData = await fetchTokenData(currentTicker);
       console.log('Fetched market data:', marketData);
+
+      if (!marketData) {
+        return new Response(
+          JSON.stringify({
+            error: `Unable to fetch market data for ${currentTicker}. Please verify the ticker symbol.`
+          }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
 
       // Fetch relevant news
       const newsArticles = await fetchNewsData(currentTicker);
