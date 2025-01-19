@@ -10,7 +10,7 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
   const { data: priceData, isLoading, error } = useQuery({
     queryKey: ['crypto-chart', symbol],
     queryFn: () => fetchCryptoData(symbol),
-    refetchInterval: 60000, // Refresh every minute
+    refetchInterval: 60000,
     staleTime: 30000,
   });
 
@@ -46,21 +46,26 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
 
   return (
     <Card className="p-4 mb-12 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
-      <div className="h-[400px]">
+      <div className="h-[400px] w-full">
         <NeonGlowFilter />
         <ChartContainer config={config}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={priceData}>
+            <LineChart 
+              data={priceData}
+              margin={{ top: 10, right: 30, left: 60, bottom: 20 }}
+            >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={formatTime}
                 className="text-muted-foreground"
+                padding={{ left: 10, right: 10 }}
               />
               <YAxis
                 domain={['auto', 'auto']}
                 tickFormatter={(value) => `$${value.toLocaleString()}`}
                 className="text-muted-foreground"
+                width={80}
               />
               <Tooltip content={ChartTooltipContent} />
               <Line
