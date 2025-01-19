@@ -1,10 +1,10 @@
-import { FibonacciBackground } from "@/components/FibonacciBackground";
+import { NeuralBackground } from "@/components/NeuralBackground";
 import { AuthProjectOverview } from "./AuthProjectOverview";
 
 export const Auth = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <FibonacciBackground />
+      <NeuralBackground />
       
       <div className="w-full max-w-4xl mb-8">
         <h1 className="text-4xl font-bold text-center mb-4 text-primary animate-fade-in">
