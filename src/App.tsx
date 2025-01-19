@@ -15,6 +15,20 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  // Check if we're on atlas.lovable.app
+  const isAtlasDomain = window.location.hostname === 'atlas.lovable.app';
+
+  // If we're on atlas.lovable.app, we want to show the Index component
+  if (isAtlasDomain) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <Index />
+        <Toaster />
+      </QueryClientProvider>
+    );
+  }
+
+  // Otherwise, show the regular router setup
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
