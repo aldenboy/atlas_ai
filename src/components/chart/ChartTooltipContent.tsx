@@ -16,8 +16,8 @@ export const ChartTooltipContent = ({ active, payload }: ChartTooltipContentProp
       <div className="grid grid-cols-2 gap-2">
         <div className="font-medium">Time:</div>
         <div>{formatTime(data.timestamp)}</div>
-        <div className="font-medium">Dominance:</div>
-        <div>{data.dominance.toFixed(2)}%</div>
+        <div className="font-medium">Price:</div>
+        <div>${data.price.toLocaleString()}</div>
       </div>
     </div>
   );

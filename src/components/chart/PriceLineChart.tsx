@@ -30,11 +30,11 @@ export const PriceLineChart = ({ data, symbol, config }: PriceLineChartProps) =>
           }}
         />
         <YAxis
-          domain={[0, 100]}
-          tickFormatter={(value) => `${value}%`}
+          domain={['auto', 'auto']}
+          tickFormatter={(value) => `$${value.toLocaleString()}`}
           className="text-muted-foreground"
           label={{ 
-            value: 'BTC Dominance (%)', 
+            value: 'Price (USD)', 
             angle: -90, 
             position: 'left',
             offset: 10,
@@ -44,9 +44,9 @@ export const PriceLineChart = ({ data, symbol, config }: PriceLineChartProps) =>
         <Tooltip content={ChartTooltipContent} />
         <Legend />
         <Line
-          name="Bitcoin Dominance"
+          name={`${symbol.charAt(0).toUpperCase() + symbol.slice(1)} Price`}
           type="monotone"
-          dataKey="dominance"
+          dataKey="price"
           stroke={`var(--color-${Object.keys(config)[0]})`}
           strokeWidth={2}
           dot={false}
