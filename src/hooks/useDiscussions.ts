@@ -15,10 +15,8 @@ export const useDiscussions = (sortBy: SortOption, limit?: number) => {
         .select(`
           *,
           discussion_comments (count),
-          user:user_id (
-            profile:profiles!inner (
-              username
-            )
+          user:profiles!user_id(
+            username
           )
         `);
 
@@ -46,8 +44,14 @@ export const useDiscussions = (sortBy: SortOption, limit?: number) => {
         throw error;
       }
       
-      console.log("Fetched discussions:", data);
-      return data as Discussion[];
+      // Transform the data to match the Discussion type
+      const discussions = data.map(item => ({
+        ...item,
+        user: item.user ? { profile: { username: item.user.username } } : null
+      }));
+      
+      console.log("Fetched discussions:", discussions);
+      return discussions as Discussion[];
     },
     refetchOnWindowFocus: false
   });
