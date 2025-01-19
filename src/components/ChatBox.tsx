@@ -1,91 +1,33 @@
-import { useState } from "react";
+import { useChat } from "@/hooks/useChat";
+import { atlasService } from "@/services/atlasService";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { ChatHeader } from "./chat/ChatHeader";
 import { ChatMessages } from "./chat/ChatMessages";
 import { ChatInput } from "./chat/ChatInput";
-import { Button } from "./ui/button";
-import { Sparkles, Download } from "lucide-react";
-
-interface Message {
-  text: string;
-  isUser: boolean;
-  paper?: string;
-}
+import { ShillMeButton } from "./chat/ShillMeButton";
 
 export const ChatBox = () => {
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    { 
-      text: "Hello! I'm ATLAS (Automated Trading and Learning Analysis System). To get started, please enter a ticker symbol (e.g., BTC, ETH) or project name you'd like me to research.", 
-      isUser: false 
-    },
-  ]);
-  const [currentTicker, setCurrentTicker] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { 
+    message, 
+    messages, 
+    currentTicker, 
+    isLoading,
+    setMessage,
+    setMessages,
+    setCurrentTicker,
+    setIsLoading,
+    handleDownloadPaper,
+    handleRefresh,
+  } = useChat();
+  
   const { toast } = useToast();
-
-  const handleDownloadPaper = async (filePath: string) => {
-    try {
-      const { data, error } = await supabase.storage
-        .from('research_papers')
-        .download(filePath);
-      
-      if (error) throw error;
-
-      // Create a download link
-      const url = window.URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filePath.split('/').pop() || 'research-paper.md';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast({
-        title: "Success",
-        description: "Research paper downloaded successfully.",
-      });
-    } catch (error: any) {
-      console.error('Error downloading paper:', error);
-      toast({
-        title: "Error",
-        description: "Failed to download research paper. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleRefresh = () => {
-    setMessages([
-      { 
-        text: "Hello! I'm ATLAS (Automated Trading and Learning Analysis System). To get started, please enter a ticker symbol (e.g., BTC, ETH) or project name you'd like me to research.", 
-        isUser: false 
-      },
-    ]);
-    setCurrentTicker(null);
-    setMessage("");
-    toast({
-      title: "Conversation Reset",
-      description: "The conversation has been reset. You can start a new analysis.",
-    });
-  };
 
   const handleShillMe = async () => {
     if (isLoading) return;
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('chat-with-atlas', {
-        body: { 
-          message: "Please shill me a random trending cryptocurrency! Be enthusiastic and include some emojis, but also mention risks. Include social media buzz and recent price action.",
-          currentTicker: null
-        }
-      });
-
-      if (error) throw error;
-
+      const data = await atlasService.getRandomShill();
       setMessages((prev) => [
         ...prev,
         { text: "Shill me a random trending crypto! 🚀", isUser: true },
@@ -118,16 +60,7 @@ export const ChatBox = () => {
       if (!currentTicker) {
         const ticker = message.trim().toUpperCase();
         setCurrentTicker(ticker);
-        
-        const { data, error } = await supabase.functions.invoke('chat-with-atlas', {
-          body: { 
-            message: `The user has selected ${ticker} as their asset of interest. Please provide a comprehensive analysis starting with token information.`,
-            currentTicker: ticker
-          }
-        });
-
-        if (error) throw error;
-
+        const data = await atlasService.analyzeToken(ticker);
         setMessages((prev) => [
           ...prev,
           { 
@@ -137,12 +70,7 @@ export const ChatBox = () => {
           }
         ]);
       } else {
-        const { data, error } = await supabase.functions.invoke('chat-with-atlas', {
-          body: { message, currentTicker }
-        });
-
-        if (error) throw error;
-
+        const data = await atlasService.askQuestion(message, currentTicker);
         setMessages((prev) => [
           ...prev,
           { 
@@ -196,16 +124,7 @@ export const ChatBox = () => {
         isLoading={isLoading}
       />
       <div className="absolute top-4 right-20 z-10">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleShillMe}
-          disabled={isLoading}
-          className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-200"
-        >
-          <Sparkles className="w-4 h-4 mr-2" />
-          Shill Me!
-        </Button>
+        <ShillMeButton onClick={handleShillMe} disabled={isLoading} />
       </div>
       <ChatMessages 
         messages={messages} 
