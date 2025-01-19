@@ -5,9 +5,8 @@ import {
   generateRandomNodes 
 } from "@/utils/nodeGenerators";
 import { 
-  updateNodePosition, 
-  drawConnections, 
-  drawNodes 
+  updateNodePositions,
+  drawScene
 } from "@/utils/nodeAnimations";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -22,7 +21,7 @@ export const NeuralBackground = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const setSize = () => {
+    const setCanvasSize = () => {
       const dpr = window.devicePixelRatio || 1;
       const displayWidth = window.innerWidth;
       const displayHeight = window.innerHeight;
@@ -36,8 +35,8 @@ export const NeuralBackground = () => {
       canvas.style.height = `${displayHeight}px`;
     };
     
-    setSize();
-    window.addEventListener("resize", setSize);
+    setCanvasSize();
+    window.addEventListener("resize", setCanvasSize);
 
     const mouse: MousePosition = { x: 0, y: 0 };
     const updateMousePosition = (e: MouseEvent) => {
@@ -71,19 +70,9 @@ export const NeuralBackground = () => {
     let time = 0;
     const animate = () => {
       time += 0.002;
-      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      nodes.forEach((node, index) => {
-        const angle = time + index * 0.1;
-        node.x += Math.cos(angle) * 0.2;
-        node.y += Math.sin(angle) * 0.2;
-        
-        updateNodePosition(node, mouse, mouseRadius, canvas);
-      });
-
-      drawConnections(ctx, nodes, connectionRadius);
-      drawNodes(ctx, nodes);
+      
+      updateNodePositions(nodes, time, mouse, mouseRadius, canvas);
+      drawScene(ctx, nodes, connectionRadius);
 
       requestAnimationFrame(animate);
     };
@@ -91,7 +80,7 @@ export const NeuralBackground = () => {
     animate();
 
     return () => {
-      window.removeEventListener("resize", setSize);
+      window.removeEventListener("resize", setCanvasSize);
       canvas.removeEventListener("mousemove", updateMousePosition);
     };
   }, [isMobile]);
