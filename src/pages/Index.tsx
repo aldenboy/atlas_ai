@@ -4,9 +4,15 @@ import { TickerTape } from "@/components/TickerTape";
 import { NewsTickerTape } from "@/components/NewsTickerTape";
 import { DiscussionForum } from "@/components/community/DiscussionForum";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useEffect } from "react";
 
 const Index = () => {
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    // Ensure the page scrolls to top on mount
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-x-hidden">
