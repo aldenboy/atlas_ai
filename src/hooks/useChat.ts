@@ -17,23 +17,19 @@ export const useChat = () => {
 
   const handleDownloadPaper = async (filePath: string) => {
     try {
-      // First, check if the file exists
-      const { data: fileExists, error: checkError } = await supabase.storage
-        .from('research_papers')
-        .list(filePath.split('/')[0]);
-
-      if (checkError) throw checkError;
-      
-      if (!fileExists || fileExists.length === 0) {
-        throw new Error('Research paper not found');
-      }
-
-      // If file exists, proceed with download
+      // Get the file directly without checking existence first
       const { data, error } = await supabase.storage
         .from('research_papers')
         .download(filePath);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error downloading paper:', error);
+        throw new Error('Research paper not found or could not be downloaded');
+      }
+
+      if (!data) {
+        throw new Error('Research paper not found');
+      }
 
       // Create and trigger download
       const blob = new Blob([data], { type: 'text/markdown' });
