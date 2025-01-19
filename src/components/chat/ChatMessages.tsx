@@ -1,6 +1,7 @@
 interface Message {
   text: string;
   isUser: boolean;
+  paper?: string;
 }
 
 interface ChatMessagesProps {
@@ -27,6 +28,18 @@ export const ChatMessages = ({ messages }: ChatMessagesProps) => {
                 {line}
               </p>
             ))}
+            {msg.paper && (
+              <div className="mt-4 p-2 bg-purple-500/20 rounded">
+                <a 
+                  href={msg.paper}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-300 hover:text-purple-200 flex items-center gap-2"
+                >
+                  📑 Download Research Paper
+                </a>
+              </div>
+            )}
           </div>
         </div>
       ))}

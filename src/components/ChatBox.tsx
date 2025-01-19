@@ -10,6 +10,7 @@ import { Sparkles } from "lucide-react";
 interface Message {
   text: string;
   isUser: boolean;
+  paper?: string;
 }
 
 export const ChatBox = () => {
@@ -56,7 +57,11 @@ export const ChatBox = () => {
       setMessages((prev) => [
         ...prev,
         { text: "Shill me a random trending crypto! 🚀", isUser: true },
-        { text: data.response, isUser: false }
+        { 
+          text: data.response, 
+          isUser: false,
+          paper: data.paper
+        }
       ]);
     } catch (error: any) {
       console.error('Error getting shill:', error);
@@ -84,7 +89,7 @@ export const ChatBox = () => {
         
         const { data, error } = await supabase.functions.invoke('chat-with-atlas', {
           body: { 
-            message: `The user has selected ${ticker} as their asset of interest. Please acknowledge this and ask what specific information they would like to know about ${ticker}. Suggest some specific aspects they might be interested in.`,
+            message: `The user has selected ${ticker} as their asset of interest. Please acknowledge this and provide a comprehensive analysis.`,
             currentTicker: ticker
           }
         });
@@ -93,7 +98,11 @@ export const ChatBox = () => {
 
         setMessages((prev) => [
           ...prev,
-          { text: data.response, isUser: false }
+          { 
+            text: data.response, 
+            isUser: false,
+            paper: data.paper
+          }
         ]);
       } else {
         const { data, error } = await supabase.functions.invoke('chat-with-atlas', {
@@ -104,7 +113,11 @@ export const ChatBox = () => {
 
         setMessages((prev) => [
           ...prev,
-          { text: data.response, isUser: false }
+          { 
+            text: data.response, 
+            isUser: false,
+            paper: data.paper
+          }
         ]);
       }
     } catch (error: any) {
