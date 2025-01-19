@@ -46,11 +46,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
         .select(`
           *,
           discussion_comments (count),
-          user_id (
-            profiles (
-              username
-            )
-          )
+          profiles!discussions_user_id_fkey (username)
         `);
 
       switch (sortBy) {
