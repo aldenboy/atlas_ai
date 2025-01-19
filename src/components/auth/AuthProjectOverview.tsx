@@ -13,9 +13,9 @@ export const AuthProjectOverview = () => {
       navigate("/");
     } else {
       // If not authenticated, stay on auth page but switch to sign in view
-      const authElement = document.querySelector('[data-auth-view="sign_in"]');
-      if (authElement) {
-        authElement.scrollIntoView({ behavior: 'smooth' });
+      const signInForm = document.querySelector('[data-view="sign_in"]');
+      if (signInForm) {
+        signInForm.scrollIntoView({ behavior: 'smooth' });
       }
     }
   };

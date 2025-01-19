@@ -49,7 +49,9 @@ export const Auth = () => {
               {view === "sign_up" ? (
                 <SignUpForm onViewChange={setView} />
               ) : (
-                <SignInForm onViewChange={setView} />
+                <div data-view="sign_in">
+                  <SignInForm onViewChange={setView} />
+                </div>
               )}
             </CardContent>
           </Card>
