@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
 import Community from "@/pages/Community";
 import { Auth } from "@/components/auth/Auth";
+import { AuthRoute } from "@/components/auth/AuthRoute";
 import "./App.css";
 
 // Create a client
@@ -25,7 +26,14 @@ function App() {
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<Index />} />
-            <Route path="/community" element={<Community />} />
+            <Route
+              path="/community"
+              element={
+                <AuthRoute>
+                  <Community />
+                </AuthRoute>
+              }
+            />
           </Routes>
         </Router>
         <Toaster />

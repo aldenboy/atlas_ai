@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatBox } from "@/components/ChatBox";
@@ -7,15 +7,39 @@ import { TickerTape } from "@/components/TickerTape";
 import { NewsTickerTape } from "@/components/NewsTickerTape";
 import { DiscussionForum } from "@/components/community/DiscussionForum";
 import { Button } from "@/components/ui/button";
-import { LogIn } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { SignInForm } from "@/components/auth/SignInForm";
-import { SignUpForm } from "@/components/auth/SignUpForm";
+import { LogOut } from "lucide-react";
 
 const Index = () => {
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [authView, setAuthView] = useState<"sign_in" | "sign_up">("sign_in");
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate("/auth");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-x-hidden">
@@ -30,10 +54,7 @@ const Index = () => {
           <ChatBox />
         </div>
         <div className="w-full">
-          <DiscussionForum 
-            showAllTopics={false} 
-            onAuthRequired={() => setShowAuthDialog(true)}
-          />
+          <DiscussionForum showAllTopics={false} />
         </div>
       </main>
       
@@ -42,29 +63,11 @@ const Index = () => {
       </div>
 
       <div className="fixed bottom-4 right-4 z-50">
-        <Button variant="outline" size="sm" onClick={() => setShowAuthDialog(true)} className="bg-background/50 backdrop-blur-sm">
-          <LogIn className="w-4 h-4 mr-2" />
-          Sign In
+        <Button variant="outline" size="sm" onClick={handleSignOut} className="bg-background/50 backdrop-blur-sm">
+          <LogOut className="w-4 h-4 mr-2" />
+          Sign Out
         </Button>
       </div>
-
-      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{authView === "sign_up" ? "Create an account" : "Sign in"}</DialogTitle>
-            <DialogDescription>
-              {authView === "sign_up" 
-                ? "Join our community to participate in discussions" 
-                : "Sign in to your account to join the discussion"}
-            </DialogDescription>
-          </DialogHeader>
-          {authView === "sign_up" ? (
-            <SignUpForm onViewChange={setAuthView} />
-          ) : (
-            <SignInForm onViewChange={setAuthView} />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
