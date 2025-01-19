@@ -1,6 +1,34 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+async function fetchTokenData(ticker: string) {
+  try {
+    // Fetch from CoinGecko API
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${ticker.toLowerCase()}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true`
+    );
+    const data = await response.json();
+    
+    // Get the first result
+    const tokenData = Object.values(data)[0] as any;
+    
+    return {
+      currentPrice: tokenData?.usd || 'N/A',
+      marketCap: tokenData?.usd_market_cap || 'N/A',
+      volume24h: tokenData?.usd_24h_vol || 'N/A',
+      priceChange24h: tokenData?.usd_24h_change || 'N/A'
+    };
+  } catch (error) {
+    console.error('Error fetching token data:', error);
+    return null;
+  }
+}
 
 const systemPrompt = `You are ATLAS (Automated Trading and Learning Analysis System), a sophisticated AI trading companion. Your responses should follow this structured format:
 
@@ -45,12 +73,8 @@ Remember to:
 - Be data-driven in your analysis
 - Focus on education rather than direct advice
 - Always remind users to DYOR (Do Their Own Research)
-- Include relevant links when available`;
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+- Include relevant links when available
+- Use the real-time market data provided`;
 
 async function generateResearchPaper(ticker: string, analysis: string): Promise<string> {
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -136,14 +160,23 @@ async function fetchNewsData(ticker: string) {
   }
 }
 
-async function callOpenAI(prompt: string, context: string = ''): Promise<{ response: string; paper?: string }> {
+async function callOpenAI(prompt: string, context: string = '', marketData: any = null): Promise<{ response: string; paper?: string }> {
   const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
   if (!openAIApiKey) {
     console.error('OpenAI API key not configured');
     throw new Error('OpenAI API key not configured');
   }
 
-  console.log('Calling OpenAI API with prompt:', prompt);
+  let enhancedPrompt = prompt;
+  if (marketData) {
+    enhancedPrompt += `\n\nCurrent Market Data:\n` +
+      `- Price: $${marketData.currentPrice}\n` +
+      `- Market Cap: $${marketData.marketCap}\n` +
+      `- 24h Volume: $${marketData.volume24h}\n` +
+      `- 24h Price Change: ${marketData.priceChange24h}%`;
+  }
+
+  console.log('Calling OpenAI API with prompt:', enhancedPrompt);
   
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -156,7 +189,7 @@ async function callOpenAI(prompt: string, context: string = ''): Promise<{ respo
         model: 'gpt-4o',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: context ? `${context}\n${prompt}` : prompt }
+          { role: 'user', content: context ? `${context}\n${enhancedPrompt}` : enhancedPrompt }
         ],
         max_tokens: 1000,
         temperature: 0.7,
@@ -207,6 +240,10 @@ serve(async (req) => {
 
     // If this is a new ticker being set
     if (message.includes(currentTicker) && message.toLowerCase().includes('selected')) {
+      // Fetch current market data
+      const marketData = await fetchTokenData(currentTicker);
+      console.log('Fetched market data:', marketData);
+
       // Fetch relevant news
       const newsArticles = await fetchNewsData(currentTicker);
       const newsContext = newsArticles.length > 0 
@@ -229,7 +266,7 @@ Please provide a comprehensive analysis following the structured format:
 
 Format the response clearly with sections and include any relevant links.`;
 
-      const { response, paper } = await callOpenAI(prompt);
+      const { response, paper } = await callOpenAI(prompt, '', marketData);
       console.log('Successfully generated response and research paper');
 
       return new Response(
