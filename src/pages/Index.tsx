@@ -1,6 +1,3 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { ChatBox } from "@/components/ChatBox";
 import { NeuralBackground } from "@/components/NeuralBackground";
 import { TickerTape } from "@/components/TickerTape";
@@ -9,29 +6,10 @@ import { DiscussionForum } from "@/components/community/DiscussionForum";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { AuthProjectOverview } from "@/components/auth/AuthProjectOverview";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-  };
+  const { session, signOut } = useAuth();
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-x-hidden">
@@ -59,9 +37,9 @@ const Index = () => {
         <TickerTape />
       </div>
 
-      {isAuthenticated && (
+      {session && (
         <div className="fixed bottom-4 right-4 z-50">
-          <Button variant="outline" size="sm" onClick={handleSignOut} className="bg-background/50 backdrop-blur-sm">
+          <Button variant="outline" size="sm" onClick={signOut} className="bg-background/50 backdrop-blur-sm">
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out
           </Button>

@@ -6,13 +6,13 @@ import Index from "@/pages/Index";
 import Community from "@/pages/Community";
 import { Auth } from "@/components/auth/Auth";
 import { AuthRoute } from "@/components/auth/AuthRoute";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./App.css";
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
       retry: 1,
     },
   },
@@ -23,18 +23,20 @@ function App() {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <Router>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<Index />} />
-            <Route
-              path="/community"
-              element={
-                <AuthRoute>
-                  <Community />
-                </AuthRoute>
-              }
-            />
-          </Routes>
+          <AuthProvider>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/" element={<Index />} />
+              <Route
+                path="/community"
+                element={
+                  <AuthRoute>
+                    <Community />
+                  </AuthRoute>
+                }
+              />
+            </Routes>
+          </AuthProvider>
         </Router>
         <Toaster />
       </QueryClientProvider>

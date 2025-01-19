@@ -1,27 +1,11 @@
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Hero = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { session, signOut } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   return (
     <div className="relative overflow-hidden bg-background py-20 sm:py-32">
@@ -40,7 +24,7 @@ export const Hero = () => {
             generates creative content, and helps you solve complex problems.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            {!isAuthenticated ? (
+            {!session ? (
               <>
                 <Button 
                   size="lg" 
