@@ -72,6 +72,18 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
   return (
     <Card className="p-4">
       <div className="h-[400px]">
+        <svg className="absolute">
+          <defs>
+            <filter id="neon-glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+        </svg>
         <ChartContainer config={config}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={priceData}>
@@ -108,6 +120,8 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
                 stroke="var(--color-price)"
                 strokeWidth={2}
                 dot={false}
+                style={{ filter: 'url(#neon-glow)' }}
+                className="drop-shadow-[0_0_8px_rgba(255,255,255,0.7)]"
               />
             </LineChart>
           </ResponsiveContainer>
