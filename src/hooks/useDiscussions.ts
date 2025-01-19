@@ -16,7 +16,9 @@ export const useDiscussions = (sortBy: SortOption, limit?: number) => {
           *,
           discussion_comments (count),
           user:user_id (
-            profile:profiles!profiles_id_fkey (username)
+            profile:profiles!inner (
+              username
+            )
           )
         `);
 
