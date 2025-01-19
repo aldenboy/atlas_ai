@@ -24,7 +24,7 @@ export const Hero = () => {
   }, []);
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-indigo-600 to-purple-600 py-20 sm:py-32">
+    <div className="relative overflow-hidden bg-background py-20 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
@@ -43,17 +43,17 @@ export const Hero = () => {
             {!isAuthenticated ? (
               <>
                 <Button 
-                  variant="outline" 
                   size="lg" 
-                  className="bg-white text-indigo-600 hover:bg-gray-100 font-semibold"
+                  className="bg-primary text-white hover:bg-primary/90 font-semibold"
                   onClick={() => navigate("/auth")}
                 >
                   Sign In
                   <LogIn className="ml-2 h-4 w-4" />
                 </Button>
                 <Button 
+                  variant="outline"
                   size="lg" 
-                  className="bg-indigo-500 text-white hover:bg-indigo-400"
+                  className="border-white/20 text-white hover:bg-white/10"
                 >
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -61,11 +61,17 @@ export const Hero = () => {
               </>
             ) : (
               <>
-                <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100">
+                <Button 
+                  size="lg" 
+                  className="bg-primary text-white hover:bg-primary/90"
+                >
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button variant="link" className="text-white hover:text-gray-200">
+                <Button 
+                  variant="link" 
+                  className="text-white hover:text-white/80"
+                >
                   Learn more →
                 </Button>
               </>
