@@ -52,8 +52,8 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
   };
 
   return (
-    <Card className="border-none shadow-none bg-transparent">
-      <CardHeader className="flex flex-row items-center justify-between px-0">
+    <Card className="border border-purple-500/20 bg-black/30 backdrop-blur-md rounded-xl p-6">
+      <CardHeader className="flex flex-row items-center justify-between px-0 pt-0">
         <CardTitle className="text-2xl font-bold">Community</CardTitle>
         <div className="flex gap-2">
           <Button onClick={handleNewDiscussion} size="sm" className="bg-primary hover:bg-primary/90">
