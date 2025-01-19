@@ -1,15 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Rocket } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const AuthProjectOverview = () => {
-  const navigate = useNavigate();
-
-  const handleLaunch = () => {
-    navigate("/");
-  };
-
   return (
     <Card className="bg-background/50 backdrop-blur-sm border-primary/20 h-[100dvh] md:h-[500px] flex flex-col">
       <CardHeader>
@@ -41,14 +32,6 @@ export const AuthProjectOverview = () => {
             Built with enterprise-grade security and real-time data synchronization for reliable performance.
           </p>
         </div>
-        <Button 
-          className="w-full mt-4" 
-          onClick={handleLaunch}
-          variant="secondary"
-        >
-          <Rocket className="mr-2 h-4 w-4" />
-          Launch App
-        </Button>
       </CardContent>
     </Card>
   );
