@@ -47,7 +47,7 @@ export const PriceLineChart = ({ data, symbol, config }: PriceLineChartProps) =>
           name={`${symbol.charAt(0).toUpperCase() + symbol.slice(1)} Price`}
           type="monotone"
           dataKey="price"
-          stroke="var(--color-price)"
+          stroke={`var(--color-${Object.keys(config)[0]})`}
           strokeWidth={2}
           dot={false}
           style={{ filter: 'url(#neon-glow)' }}

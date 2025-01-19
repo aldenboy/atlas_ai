@@ -1,7 +1,7 @@
 export interface ChartConfig {
-  price: {
-    label: string;
-    theme: {
+  [key: string]: {
+    label?: string;
+    theme?: {
       light: string;
       dark: string;
     };
