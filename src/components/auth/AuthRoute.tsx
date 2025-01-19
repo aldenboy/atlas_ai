@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { AuthError, Session } from "@supabase/supabase-js";
 
 export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
@@ -31,9 +32,7 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
         
         if (userError || !user) {
           console.error("User verification error:", userError);
-          await supabase.auth.signOut();
-          setSession(false);
-          setLoading(false);
+          await handleSignOut();
           return;
         }
 
@@ -41,6 +40,17 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
       } catch (error) {
         console.error("Auth check error:", error);
+        await handleSignOut();
+      }
+    };
+
+    const handleSignOut = async () => {
+      try {
+        await supabase.auth.signOut();
+        setSession(false);
+        setLoading(false);
+      } catch (error) {
+        console.error("Sign out error:", error);
         setSession(false);
         setLoading(false);
       }
@@ -49,7 +59,7 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+      if (event === 'SIGNED_OUT') {
         setSession(false);
         navigate('/auth', { replace: true });
         return;

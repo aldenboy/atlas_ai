@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthError, Session } from "@supabase/supabase-js";
 
 export const useAuthCheck = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +31,8 @@ export const useAuthCheck = () => {
       }
     } catch (error) {
       console.error("Error clearing session:", error);
+      setIsAuthenticated(false);
+      setIsLoading(false);
       navigate("/auth", { replace: true });
     }
   };
@@ -75,7 +78,7 @@ export const useAuthCheck = () => {
       
       console.log("Auth state changed:", event);
       
-      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+      if (event === 'SIGNED_OUT') {
         await clearSession();
         return;
       }
