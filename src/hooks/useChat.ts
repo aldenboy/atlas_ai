@@ -17,10 +17,18 @@ export const useChat = () => {
 
   const handleDownloadPaper = async (filePath: string) => {
     try {
-      // Get the file directly without checking existence first
+      // Extract just the relative path if a full URL was provided
+      const relativePath = filePath.includes('research_papers/') 
+        ? filePath.split('research_papers/').pop() 
+        : filePath;
+
+      if (!relativePath) {
+        throw new Error('Invalid file path');
+      }
+
       const { data, error } = await supabase.storage
         .from('research_papers')
-        .download(filePath);
+        .download(relativePath);
       
       if (error) {
         console.error('Error downloading paper:', error);
@@ -36,7 +44,7 @@ export const useChat = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = filePath.split('/').pop() || 'research-paper.md';
+      a.download = relativePath.split('/').pop() || 'research-paper.md';
       document.body.appendChild(a);
       a.click();
       
