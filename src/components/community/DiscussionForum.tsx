@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,36 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Plus, TrendingUp, Clock, Star, ArrowRight } from "lucide-react";
 import { DiscussionThread } from "./DiscussionThread";
 import { NewDiscussionForm } from "./NewDiscussionForm";
-import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 
 type SortOption = "trending" | "new" | "top";
 
 interface DiscussionForumProps {
   showAllTopics?: boolean;
-  onAuthRequired?: () => void;
 }
 
-export const DiscussionForum = ({ showAllTopics = false, onAuthRequired }: DiscussionForumProps) => {
+export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps) => {
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("trending");
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUserId(user?.id || null);
-    };
-    
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user.id || null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   const { data: discussions, isLoading } = useQuery({
     queryKey: ["discussions", sortBy],
@@ -74,28 +55,12 @@ export const DiscussionForum = ({ showAllTopics = false, onAuthRequired }: Discu
     }
   });
 
-  const handleNewDiscussion = () => {
-    if (!userId) {
-      if (onAuthRequired) {
-        onAuthRequired();
-      } else {
-        toast({
-          title: "Authentication Required",
-          description: "Please log in to create a discussion.",
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-    setShowNewDiscussion(true);
-  };
-
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="flex flex-row items-center justify-between px-0">
         <CardTitle className="text-2xl font-bold">Community</CardTitle>
         <div className="flex gap-2">
-          <Button onClick={handleNewDiscussion} size="sm" className="bg-primary hover:bg-primary/90">
+          <Button onClick={() => setShowNewDiscussion(true)} size="sm" className="bg-primary hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" />
             New Discussion
           </Button>

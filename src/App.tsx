@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
 import Community from "@/pages/Community";
-import { Auth } from "@/components/auth/Auth";
 import "./App.css";
 
 // Create a client
@@ -23,7 +22,6 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <Router>
           <Routes>
-            <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<Index />} />
             <Route path="/community" element={<Community />} />
           </Routes>
