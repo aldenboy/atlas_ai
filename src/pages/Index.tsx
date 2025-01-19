@@ -20,17 +20,17 @@ const Index = () => {
         <NewsTickerTape />
       </div>
       
-      <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
+      <main className="flex-1 container mx-auto px-4 py-8 relative z-10 space-y-12">
+        <div className="grid md:grid-cols-2 gap-8">
           <div className="w-full">
             <ChatBox />
           </div>
-          <div className="w-full md:mt-0 mt-4">
+          <div className="w-full">
             <AuthProjectOverview />
           </div>
         </div>
         
-        <div className="mb-8">
+        <div className="w-full">
           <CryptoPriceChart />
         </div>
         
