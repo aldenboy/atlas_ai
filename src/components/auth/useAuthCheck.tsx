@@ -16,12 +16,14 @@ export const useAuthCheck = () => {
         }
       });
       
-      await supabase.auth.signOut({ scope: 'local' });
+      await supabase.auth.signOut();
     } catch (error) {
       console.error("Error clearing session:", error);
     }
     
-    navigate("/auth");
+    if (location.pathname !== "/") {
+      navigate("/auth");
+    }
   };
 
   useEffect(() => {
@@ -80,6 +82,7 @@ export const useAuthCheck = () => {
       console.log("Auth state changed:", event);
       
       if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
         if (location.pathname !== "/") {
           await clearSession();
         }
