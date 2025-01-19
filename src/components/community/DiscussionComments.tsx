@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { formatDistance } from "date-fns";
+import { ThumbsUp, ThumbsDown, Reply } from "lucide-react";
 
 interface Comment {
   id: string;
   content: string;
   created_at: string;
   user_id: string;
+  likes: number;
 }
 
 export const DiscussionComments = ({ discussionId }: { discussionId: string }) => {
@@ -68,29 +70,52 @@ export const DiscussionComments = ({ discussionId }: { discussionId: string }) =
   };
 
   return (
-    <div className="space-y-4 mt-4">
-      <div className="space-y-4">
-        {comments?.map((comment) => (
-          <div key={comment.id} className="bg-accent/50 rounded-lg p-4">
-            <p className="text-sm">{comment.content}</p>
-            <p className="text-xs text-muted-foreground mt-2">
-              {formatDistance(new Date(comment.created_at), new Date(), { addSuffix: true })}
-            </p>
-          </div>
-        ))}
-      </div>
-      
+    <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-2">
         <Textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Add a comment..."
-          className="min-h-[80px]"
+          placeholder="What are your thoughts?"
+          className="min-h-[100px] bg-background/50 focus:bg-background"
         />
-        <Button type="submit" disabled={isSubmitting || !newComment.trim()}>
-          {isSubmitting ? "Posting..." : "Post Comment"}
-        </Button>
+        <div className="flex justify-end">
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || !newComment.trim()}
+            className="w-full sm:w-auto"
+          >
+            {isSubmitting ? "Posting..." : "Comment"}
+          </Button>
+        </div>
       </form>
+
+      <div className="space-y-4">
+        {comments?.map((comment) => (
+          <div key={comment.id} className="group">
+            <div className="flex items-start gap-2">
+              <div className="flex-1">
+                <div className="text-xs text-muted-foreground mb-1">
+                  {formatDistance(new Date(comment.created_at), new Date(), { addSuffix: true })}
+                </div>
+                <p className="text-sm">{comment.content}</p>
+                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                  <Button variant="ghost" size="sm" className="h-auto py-1 px-2 hover:text-primary">
+                    <ThumbsUp className="w-3 h-3 mr-1" />
+                    <span>{comment.likes || 0}</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-auto py-1 px-2 hover:text-primary">
+                    <ThumbsDown className="w-3 h-3 mr-1" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-auto py-1 px-2 hover:text-primary">
+                    <Reply className="w-3 h-3 mr-1" />
+                    Reply
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
