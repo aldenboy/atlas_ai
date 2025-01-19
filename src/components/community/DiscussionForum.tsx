@@ -50,7 +50,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
   };
 
   return (
-    <Card className="border border-purple-500/20 bg-black/30 backdrop-blur-md rounded-xl p-6">
+    <Card className="border border-purple-500/20 bg-black/30 backdrop-blur-md rounded-xl p-6 h-full">
       <ForumHeader 
         showAllTopics={showAllTopics} 
         onNewDiscussion={handleNewDiscussion} 

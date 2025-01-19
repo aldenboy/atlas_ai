@@ -6,7 +6,6 @@ import { ChartSkeleton } from "./chart/ChartSkeleton";
 import { ChartError } from "./chart/ChartError";
 import { PriceLineChart } from "./chart/PriceLineChart";
 import { NeonGlowFilter } from "./chart/NeonGlowFilter";
-import { getChartConfig } from "./chart/ChartConfig";
 
 export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) => {
   const { data: priceData, isLoading, error } = useQuery({
@@ -24,10 +23,18 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
     return <ChartError />;
   }
 
-  const config = getChartConfig(symbol);
+  const config = {
+    price: {
+      label: `${symbol.charAt(0).toUpperCase() + symbol.slice(1)} Price`,
+      theme: {
+        light: '#646cff',
+        dark: '#646cff'
+      }
+    }
+  };
 
   return (
-    <Card className="p-6 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
+    <Card className="p-6 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20 h-full">
       <div className="h-[300px]">
         <NeonGlowFilter />
         <ChartContainer config={config}>

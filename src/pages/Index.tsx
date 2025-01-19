@@ -41,11 +41,15 @@ const Index = () => {
         </div>
         
         <div className="grid md:grid-cols-2 gap-8">
-          <div className="w-full">
-            <CryptoPriceChart symbol={chartSymbol} />
+          <div className="w-full h-full flex">
+            <div className="w-full">
+              <CryptoPriceChart symbol={chartSymbol} />
+            </div>
           </div>
-          <div className="w-full">
-            <DiscussionForum showAllTopics={false} />
+          <div className="w-full h-full flex">
+            <div className="w-full">
+              <DiscussionForum showAllTopics={false} />
+            </div>
           </div>
         </div>
       </main>
