@@ -6,6 +6,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { FibonacciBackground } from "@/components/FibonacciBackground";
+import { Button } from "@/components/ui/button";
+import { Rocket } from "lucide-react";
 
 export const Auth = () => {
   const [errorMessage, setErrorMessage] = useState("");
@@ -58,6 +60,14 @@ export const Auth = () => {
                   Join a vibrant community of traders and investors sharing insights and strategies.
                 </p>
               </div>
+              <Button 
+                className="w-full mt-4" 
+                onClick={() => navigate("/")}
+                variant="secondary"
+              >
+                <Rocket className="mr-2 h-4 w-4" />
+                Launch App
+              </Button>
             </CardContent>
           </Card>
 
