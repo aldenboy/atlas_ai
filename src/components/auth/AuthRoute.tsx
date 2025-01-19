@@ -7,14 +7,23 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Clear any stale session data
+  // Clear all session data and storage
   const clearSession = async () => {
     try {
-      localStorage.removeItem('supabase.auth.token');
+      // Clear all Supabase-related items from localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Force a clean signout without trying to call the API
       await supabase.auth.signOut({ scope: 'local' });
     } catch (error) {
       console.error("Error clearing session:", error);
     }
+    
+    // Always navigate to auth page after cleanup
     navigate("/auth");
   };
 
@@ -59,6 +68,8 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      
       console.log("Auth state changed:", event);
       
       if (event === 'SIGNED_OUT') {
@@ -67,9 +78,8 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
       }
       
       if (event === 'SIGNED_IN' && session) {
-        if (mounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
+        return;
       }
 
       // Handle token refresh
