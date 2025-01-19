@@ -2,8 +2,6 @@ import { useEffect, useRef } from "react";
 import { Node, MousePosition } from "@/types/neural";
 import { 
   generateFaceOutlineNodes, 
-  generateEyeNodes, 
-  generateMouthNodes, 
   generateRandomNodes 
 } from "@/utils/nodeGenerators";
 import { 
@@ -24,7 +22,6 @@ export const NeuralBackground = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set canvas size with proper device pixel ratio
     const setSize = () => {
       const dpr = window.devicePixelRatio || 1;
       const displayWidth = window.innerWidth;
@@ -42,7 +39,6 @@ export const NeuralBackground = () => {
     setSize();
     window.addEventListener("resize", setSize);
 
-    // Mouse position tracking with proper scaling
     const mouse: MousePosition = { x: 0, y: 0 };
     const updateMousePosition = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -59,38 +55,30 @@ export const NeuralBackground = () => {
       mouse.y = 0;
     });
 
-    // Initialize nodes with adjusted parameters
-    const numNodes = isMobile ? 100 : 200;
-    const connectionRadius = isMobile ? 100 : 150;
+    const numNodes = isMobile ? 50 : 100;
+    const connectionRadius = isMobile ? 150 : 200;
     const mouseRadius = isMobile ? 100 : 150;
     
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
-    const minDimension = Math.min(window.innerWidth, window.innerHeight);
-    const faceRadius = minDimension * (isMobile ? 0.25 : 0.35);
+    const radius = Math.min(window.innerWidth, window.innerHeight) * 0.4;
 
     const nodes: Node[] = [
-      ...generateFaceOutlineNodes(centerX, centerY, faceRadius, numNodes),
-      ...generateEyeNodes(centerX, centerY, faceRadius),
-      ...generateMouthNodes(centerX, centerY, faceRadius),
-      ...generateRandomNodes(centerX, centerY, faceRadius, numNodes)
+      ...generateFaceOutlineNodes(centerX, centerY, radius, numNodes),
+      ...generateRandomNodes(centerX, centerY, radius, numNodes)
     ];
 
-    // Add time-based movement
     let time = 0;
     const animate = () => {
       time += 0.002;
-      ctx.fillStyle = "rgba(26, 31, 44, 0.2)";
-      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Update nodes with time-based movement
       nodes.forEach((node, index) => {
-        // Add subtle circular motion
         const angle = time + index * 0.1;
-        node.x += Math.cos(angle) * 0.5;
-        node.y += Math.sin(angle) * 0.5;
+        node.x += Math.cos(angle) * 0.2;
+        node.y += Math.sin(angle) * 0.2;
         
-        // Add mouse interaction
         updateNodePosition(node, mouse, mouseRadius, canvas);
       });
 
@@ -111,7 +99,7 @@ export const NeuralBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full -z-10"
+      className="fixed inset-0 w-full h-full -z-10 bg-black"
       style={{ touchAction: 'none' }}
     />
   );
