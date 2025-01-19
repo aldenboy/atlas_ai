@@ -11,12 +11,12 @@ export const AuthProjectOverview = () => {
   };
 
   return (
-    <Card className="bg-background/50 backdrop-blur-sm border-primary/20">
+    <Card className="bg-background/50 backdrop-blur-sm border-primary/20 h-[100dvh] md:h-[500px] flex flex-col">
       <CardHeader>
         <CardTitle>Project Overview</CardTitle>
         <CardDescription>Discover what makes Atlas unique</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-1">
         <div className="space-y-2">
           <h3 className="font-semibold">🤖 AI-Powered Analysis</h3>
           <p className="text-sm text-muted-foreground">
@@ -33,6 +33,12 @@ export const AuthProjectOverview = () => {
           <h3 className="font-semibold">👥 Community Driven</h3>
           <p className="text-sm text-muted-foreground">
             Join a vibrant community of traders and investors sharing insights and strategies.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <h3 className="font-semibold">🔒 Secure & Reliable</h3>
+          <p className="text-sm text-muted-foreground">
+            Built with enterprise-grade security and real-time data synchronization for reliable performance.
           </p>
         </div>
         <Button 
