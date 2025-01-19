@@ -3,7 +3,7 @@ import { CheckCircle2, Circle } from "lucide-react";
 
 const roadmapItems = [
   {
-    quarter: "Q2 2024",
+    quarter: "Q4 2024",
     features: [
       { name: "Advanced Market Analysis", completed: true },
       { name: "Real-time Trading Signals", completed: true },
@@ -11,7 +11,7 @@ const roadmapItems = [
     ],
   },
   {
-    quarter: "Q3 2024",
+    quarter: "Q1 2025",
     features: [
       { name: "Portfolio Management Tools", completed: false },
       { name: "Custom Trading Strategies", completed: false },
@@ -19,7 +19,7 @@ const roadmapItems = [
     ],
   },
   {
-    quarter: "Q4 2024",
+    quarter: "Q2 2025",
     features: [
       { name: "Multi-Exchange Integration", completed: false },
       { name: "Risk Management Dashboard", completed: false },
@@ -27,7 +27,7 @@ const roadmapItems = [
     ],
   },
   {
-    quarter: "Q1 2025",
+    quarter: "Q3 2025",
     features: [
       { name: "Social Trading Features", completed: false },
       { name: "Mobile App Release", completed: false },
