@@ -1,35 +1,18 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Index from "@/pages/Index";
 import Community from "@/pages/Community";
-import "./App.css";
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-    },
-  },
-});
-
-function App() {
+const App = () => {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/community" element={<Community />} />
-          </Routes>
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </React.StrictMode>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/community" element={<Community />} />
+        {/* Catch all other routes and redirect to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
