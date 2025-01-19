@@ -11,27 +11,21 @@ type NewsItem = {
 
 const fetchNews = async () => {
   try {
-    console.log('Fetching news...');
     const { data, error } = await supabase.functions.invoke('fetch-news');
     
     if (error) {
       console.error('Supabase function error:', error);
-      throw error;
-    }
-
-    if (!data?.articles) {
-      console.error('No articles in response:', data);
       return [];
     }
 
-    return data.articles.slice(0, 6).map((article: any) => ({
+    return (data?.articles || []).slice(0, 6).map((article: any) => ({
       id: article.url,
       text: article.title,
       category: 'market' as const
     }));
   } catch (error) {
     console.error('Failed to fetch news:', error);
-    throw error;
+    return [];
   }
 };
 
@@ -41,7 +35,6 @@ export const NewsTickerTape = () => {
     queryFn: fetchNews,
     refetchInterval: 300000, // Refresh every 5 minutes
     retry: 2,
-    staleTime: 60000, // Consider data stale after 1 minute
   });
 
   if (error) {

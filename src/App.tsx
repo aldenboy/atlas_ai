@@ -11,7 +11,6 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       retry: 1,
-      refetchOnWindowFocus: false, // Disable refetch on window focus
     },
   },
 });
@@ -20,29 +19,29 @@ const App = () => {
   // Check if we're on atlas.lovable.app
   const isAtlasDomain = window.location.hostname === 'atlas.lovable.app';
 
+  // If we're on atlas.lovable.app, we want to show the Index component
+  if (isAtlasDomain) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <Index />
+        <Toaster />
+      </QueryClientProvider>
+    );
+  }
+
+  // Otherwise, show the regular router setup
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background/95 text-foreground relative">
-        {isAtlasDomain ? (
-          // If we're on atlas.lovable.app, show only the Index component
-          <>
-            <Index />
-            <Toaster />
-          </>
-        ) : (
-          // Otherwise, show the regular router setup
-          <Router>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/app" element={<Index />} />
-              <Route path="/community" element={<Community />} />
-              {/* Catch all other routes and redirect to home */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-            <Toaster />
-          </Router>
-        )}
-      </div>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/app" element={<Index />} />
+          <Route path="/community" element={<Community />} />
+          {/* Catch all other routes and redirect to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+      <Toaster />
     </QueryClientProvider>
   );
 };
