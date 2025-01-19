@@ -7,10 +7,10 @@ export const Hero = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-            Next-Generation AI
+            ATLAS
             <br />
             <span className="inline-flex items-center">
-              Powered by Advanced LLMs
+              Automated Trading and Learning Analysis System
               <Sparkles className="ml-2 h-8 w-8 animate-float" />
             </span>
           </h1>
