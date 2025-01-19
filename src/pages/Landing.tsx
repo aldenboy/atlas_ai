@@ -10,7 +10,7 @@ const Landing = () => {
       
       {/* Hero Section with Project Overview */}
       <div className="relative z-10">
-        <div className="container mx-auto px-4 pt-20 pb-32 text-center">
+        <div className="container mx-auto px-4 pt-20 pb-16 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
             ATLAS
           </h1>
@@ -21,16 +21,10 @@ const Landing = () => {
             An advanced AI-powered platform for cryptocurrency market analysis, 
             sentiment tracking, and community-driven insights.
           </p>
-          <Link to="/app">
-            <Button size="lg" className="animate-fade-in delay-300 bg-primary hover:bg-primary/90">
-              <Rocket className="mr-2" />
-              Launch App
-            </Button>
-          </Link>
         </div>
 
         {/* Blockchain Introduction */}
-        <div className="container mx-auto px-4 py-20">
+        <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white">
             <div className="bg-black/50 backdrop-blur-sm p-8 rounded-lg border border-primary/20 hover:border-primary/40 transition-all animate-fade-in delay-400">
               <Bitcoin className="w-12 h-12 text-primary mb-4" />
@@ -59,6 +53,16 @@ const Landing = () => {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Launch App Button Section */}
+        <div className="container mx-auto px-4 py-16 text-center">
+          <Link to="/app">
+            <Button size="lg" className="animate-fade-in delay-700 bg-primary hover:bg-primary/90">
+              <Rocket className="mr-2" />
+              Launch App
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
