@@ -38,32 +38,35 @@ export const ChatMessages = ({ messages, onDownloadPaper }: ChatMessagesProps) =
         >
           <div
             className={cn(
-              "rounded-lg px-4 py-2 shadow-md",
+              "rounded-lg px-4 py-2 shadow-md w-full",
               message.isUser
-                ? "bg-purple-500 text-white"
-                : "bg-gray-800 text-gray-100"
+                ? "bg-purple-500 text-white text-right"
+                : "bg-gray-800 text-gray-100 text-left"
             )}
           >
             <ReactMarkdown 
-              className="prose prose-invert max-w-none"
+              className="prose prose-invert max-w-none text-left"
               components={{
                 a: ({ node, ...props }) => (
                   <a {...props} className="text-purple-300 hover:text-purple-200" target="_blank" rel="noopener noreferrer" />
                 ),
                 h1: ({ node, ...props }) => (
-                  <h1 {...props} className="text-2xl font-bold mb-4 text-purple-200" />
+                  <h1 {...props} className="text-2xl font-bold mb-4 text-purple-200 text-left" />
                 ),
                 h2: ({ node, ...props }) => (
-                  <h2 {...props} className="text-xl font-semibold mb-3 text-purple-200" />
+                  <h2 {...props} className="text-xl font-semibold mb-3 text-purple-200 text-left" />
                 ),
                 h3: ({ node, ...props }) => (
-                  <h3 {...props} className="text-lg font-medium mb-2 text-purple-200" />
+                  <h3 {...props} className="text-lg font-medium mb-2 text-purple-200 text-left" />
                 ),
                 ul: ({ node, ...props }) => (
-                  <ul {...props} className="list-disc list-inside mb-4" />
+                  <ul {...props} className="list-disc list-inside mb-4 text-left" />
                 ),
                 li: ({ node, ...props }) => (
-                  <li {...props} className="mb-1" />
+                  <li {...props} className="mb-1 text-left" />
+                ),
+                p: ({ node, ...props }) => (
+                  <p {...props} className="mb-2 text-left" />
                 ),
               }}
             >
