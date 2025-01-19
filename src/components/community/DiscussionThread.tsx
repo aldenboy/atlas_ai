@@ -96,11 +96,11 @@ export const DiscussionThread = ({ discussion }: { discussion: Discussion }) => 
                 <span>•</span>
                 <span>{formatDistance(new Date(discussion.created_at), new Date(), { addSuffix: true })}</span>
               </div>
-              <h3 className="font-semibold text-lg hover:text-primary transition-colors">
+              <h3 className="font-semibold text-lg hover:text-primary transition-colors text-left">
                 {discussion.title}
               </h3>
               {isExpanded && (
-                <p className="text-sm mt-2 text-muted-foreground">
+                <p className="text-sm mt-2 text-muted-foreground text-left">
                   {discussion.content}
                 </p>
               )}
