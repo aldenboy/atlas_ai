@@ -2,22 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 
 export const AuthProjectOverview = () => {
   const navigate = useNavigate();
 
-  const handleLaunch = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      navigate("/");
-    } else {
-      // If not authenticated, stay on auth page but switch to sign in view
-      const signInForm = document.querySelector('[data-view="sign_in"]');
-      if (signInForm) {
-        signInForm.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
+  const handleLaunch = () => {
+    navigate("/");
   };
 
   return (
