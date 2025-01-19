@@ -16,7 +16,7 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
 
   if (isLoading) {
     return (
-      <Card className="p-4">
+      <Card className="p-4 mb-12 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
         <div className="h-[400px] flex items-center justify-center">
           Loading chart data...
         </div>
@@ -26,7 +26,7 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
 
   if (error) {
     return (
-      <Card className="p-4">
+      <Card className="p-4 mb-12 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
         <div className="h-[400px] flex items-center justify-center text-red-500">
           Error loading chart data
         </div>
@@ -45,13 +45,13 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
   };
 
   return (
-    <Card className="p-4">
+    <Card className="p-4 mb-12 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
       <div className="h-[400px]">
         <NeonGlowFilter />
         <ChartContainer config={config}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={priceData}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={formatTime}
