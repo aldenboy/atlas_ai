@@ -58,7 +58,7 @@ const Index = () => {
         <div className="grid md:grid-cols-2 gap-8">
           <div className="w-full h-full flex">
             <div className="w-full">
-              <CryptoPriceChart symbol={chartSymbol} />
+              <CryptoPriceChart />
             </div>
           </div>
           <div className="w-full h-full flex">
