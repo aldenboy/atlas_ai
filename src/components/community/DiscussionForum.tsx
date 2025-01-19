@@ -22,7 +22,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
   const [sortBy, setSortBy] = useState<SortOption>("trending");
   const { toast } = useToast();
 
-  const { data: discussions, isLoading } = useDiscussions(sortBy, showAllTopics ? undefined : 3);
+  const { data: discussions, isLoading } = useDiscussions(sortBy, showAllTopics ? undefined : 2);
 
   useEffect(() => {
     const checkAuth = async () => {
