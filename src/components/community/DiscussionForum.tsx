@@ -13,9 +13,10 @@ type SortOption = "trending" | "new" | "top";
 
 interface DiscussionForumProps {
   showAllTopics?: boolean;
+  onAuthRequired?: () => void;
 }
 
-export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps) => {
+export const DiscussionForum = ({ showAllTopics = false, onAuthRequired }: DiscussionForumProps) => {
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("trending");
@@ -75,11 +76,15 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
 
   const handleNewDiscussion = () => {
     if (!userId) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to create a discussion.",
-        variant: "destructive",
-      });
+      if (onAuthRequired) {
+        onAuthRequired();
+      } else {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to create a discussion.",
+          variant: "destructive",
+        });
+      }
       return;
     }
     setShowNewDiscussion(true);
