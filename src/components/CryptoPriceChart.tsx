@@ -9,10 +9,11 @@ import { NeonGlowFilter } from "./chart/NeonGlowFilter";
 
 export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) => {
   const { data: priceData, isLoading, error } = useQuery({
-    queryKey: ['crypto-chart', symbol],
-    queryFn: () => fetchCryptoData(symbol),
+    queryKey: ['crypto-chart', symbol.toLowerCase()], // Ensure consistent casing
+    queryFn: () => fetchCryptoData(symbol.toLowerCase()),
     refetchInterval: 60000, // Refresh every minute
     staleTime: 30000,
+    enabled: !!symbol, // Only run query when symbol is available
   });
 
   if (isLoading) {

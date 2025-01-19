@@ -18,7 +18,22 @@ const Index = () => {
 
   useEffect(() => {
     if (currentTicker) {
-      setChartSymbol(currentTicker.toLowerCase());
+      // Map common ticker symbols to their CoinGecko IDs
+      const tickerMap: { [key: string]: string } = {
+        'BTC': 'bitcoin',
+        'ETH': 'ethereum',
+        'SOL': 'solana',
+        'XRP': 'ripple',
+        'DOGE': 'dogecoin',
+        'ADA': 'cardano',
+        'DOT': 'polkadot',
+        'LINK': 'chainlink',
+        'UNI': 'uniswap',
+        'AAVE': 'aave',
+      };
+      
+      const geckoId = tickerMap[currentTicker.toUpperCase()] || currentTicker.toLowerCase();
+      setChartSymbol(geckoId);
     }
   }, [currentTicker]);
 
