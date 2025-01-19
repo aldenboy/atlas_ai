@@ -7,6 +7,17 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  // Clear any stale session data
+  const clearSession = async () => {
+    try {
+      localStorage.removeItem('supabase.auth.token');
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (error) {
+      console.error("Error clearing session:", error);
+    }
+    navigate("/auth");
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -17,14 +28,12 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
         
         if (error) {
           console.error("Auth error:", error);
-          // Clear any existing session data
-          await supabase.auth.signOut();
-          navigate("/auth");
+          await clearSession();
           return;
         }
 
         if (!session) {
-          navigate("/auth");
+          await clearSession();
           return;
         }
 
@@ -33,8 +42,7 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
         
         if (userError || !user) {
           console.error("User verification error:", userError);
-          await supabase.auth.signOut();
-          navigate("/auth");
+          await clearSession();
           return;
         }
 
@@ -43,8 +51,7 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (error) {
         console.error("Session check error:", error);
-        await supabase.auth.signOut();
-        navigate("/auth");
+        await clearSession();
       }
     };
 
@@ -54,8 +61,8 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
       
-      if (event === 'SIGNED_OUT' || !session) {
-        navigate("/auth");
+      if (event === 'SIGNED_OUT') {
+        await clearSession();
         return;
       }
       
