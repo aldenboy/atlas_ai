@@ -22,16 +22,16 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isAtlasDomain ? (
-        // If we're on atlas.lovable.app, show only the Index component
-        <div className="min-h-screen bg-background">
-          <Index />
-          <Toaster />
-        </div>
-      ) : (
-        // Otherwise, show the regular router setup
-        <Router>
-          <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background text-foreground">
+        {isAtlasDomain ? (
+          // If we're on atlas.lovable.app, show only the Index component
+          <>
+            <Index />
+            <Toaster />
+          </>
+        ) : (
+          // Otherwise, show the regular router setup
+          <Router>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/app" element={<Index />} />
@@ -40,9 +40,9 @@ const App = () => {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <Toaster />
-          </div>
-        </Router>
-      )}
+          </Router>
+        )}
+      </div>
     </QueryClientProvider>
   );
 };
