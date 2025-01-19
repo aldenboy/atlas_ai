@@ -7,23 +7,47 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check initial session
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Auth error:", error);
+          navigate("/auth");
+          return;
+        }
+
+        if (!session) {
+          navigate("/auth");
+          return;
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Session check error:", error);
         navigate("/auth");
       }
-      setIsLoading(false);
     };
 
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
         navigate("/auth");
+        return;
+      }
+      
+      if (event === 'SIGNED_IN' && session) {
+        setIsLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   if (isLoading) {
