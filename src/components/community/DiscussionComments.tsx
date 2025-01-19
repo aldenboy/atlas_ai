@@ -76,7 +76,7 @@ export const DiscussionComments = ({ discussionId }: { discussionId: string }) =
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="What are your thoughts?"
-          className="min-h-[100px] bg-background/50 focus:bg-background"
+          className="min-h-[100px] bg-background/50 focus:bg-background text-left"
         />
         <div className="flex justify-end">
           <Button 
@@ -91,13 +91,13 @@ export const DiscussionComments = ({ discussionId }: { discussionId: string }) =
 
       <div className="space-y-4">
         {comments?.map((comment) => (
-          <div key={comment.id} className="group">
+          <div key={comment.id} className="group text-left">
             <div className="flex items-start gap-2">
               <div className="flex-1">
-                <div className="text-xs text-muted-foreground mb-1">
+                <div className="text-xs text-muted-foreground mb-1 text-left">
                   {formatDistance(new Date(comment.created_at), new Date(), { addSuffix: true })}
                 </div>
-                <p className="text-sm">{comment.content}</p>
+                <p className="text-sm text-left">{comment.content}</p>
                 <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                   <Button variant="ghost" size="sm" className="h-auto py-1 px-2 hover:text-primary">
                     <ThumbsUp className="w-3 h-3 mr-1" />
