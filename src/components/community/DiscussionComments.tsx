@@ -38,6 +38,16 @@ export const DiscussionComments = ({ discussionId }: { discussionId: string }) =
     e.preventDefault();
     if (!newComment.trim()) return;
 
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to post comments.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const { error } = await supabase
@@ -46,6 +56,7 @@ export const DiscussionComments = ({ discussionId }: { discussionId: string }) =
           {
             discussion_id: discussionId,
             content: newComment.trim(),
+            user_id: session.user.id,
           },
         ]);
 
