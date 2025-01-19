@@ -15,7 +15,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative min-h-screen flex flex-col bg-gradient-to-b from-background/95 to-background">
       <NeuralBackground />
       
       <div className="sticky top-0 w-full z-10">

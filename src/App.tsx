@@ -22,7 +22,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-background/95 text-foreground relative">
         {isAtlasDomain ? (
           // If we're on atlas.lovable.app, show only the Index component
           <>
