@@ -1,11 +1,11 @@
 export interface PriceData {
   timestamp: number;
-  price: number;
+  dominance: number;
 }
 
 export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
   const response = await fetch(
-    `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=1`
+    'https://api.coingecko.com/api/v3/global'
   );
   
   if (!response.ok) {
@@ -13,10 +13,14 @@ export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
   }
   
   const data = await response.json();
-  return data.prices.map(([timestamp, price]: [number, number]) => ({
+  const timestamp = Date.now();
+  
+  // For Bitcoin dominance, we'll return a single point since the global endpoint
+  // only provides current dominance
+  return [{
     timestamp,
-    price,
-  }));
+    dominance: data.data.market_cap_percentage.btc
+  }];
 };
 
 export const formatTime = (timestamp: number) => {
