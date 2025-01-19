@@ -1,90 +1,46 @@
-import { useEffect, useRef } from "react";
+import React from "react";
 
 export const FibonacciBackground = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Set canvas size with proper device pixel ratio
-    const setSize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const displayWidth = window.innerWidth;
-      const displayHeight = window.innerHeight;
-      
-      canvas.width = displayWidth * dpr;
-      canvas.height = displayHeight * dpr;
-      
-      ctx.scale(dpr, dpr);
-      
-      canvas.style.width = `${displayWidth}px`;
-      canvas.style.height = `${displayHeight}px`;
-    };
-    
-    setSize();
-    window.addEventListener("resize", setSize);
-
-    // Fibonacci spiral drawing function
-    const drawFibonacciSpiral = (time: number) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      const centerX = canvas.width / 4;
-      const centerY = canvas.height / 2;
-      const scale = Math.min(canvas.width, canvas.height) / 8;
-      
-      let a = 0;
-      let b = 1;
-      let angle = 0;
-      const goldenRatio = (1 + Math.sqrt(5)) / 2;
-      
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      
-      // Animate based on time
-      const progress = (Math.sin(time / 2000) + 1) / 2;
-      
-      for (let i = 0; i < 15; i++) {
-        const radius = Math.sqrt(b) * scale * progress;
-        const x = centerX + radius * Math.cos(angle);
-        const y = centerY + radius * Math.sin(angle);
-        
-        ctx.lineTo(x, y);
-        
-        const temp = b;
-        b = a + b;
-        a = temp;
-        angle += Math.PI / 2;
-      }
-      
-      ctx.strokeStyle = "rgba(168, 85, 247, 0.4)"; // Purple color matching the theme
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    };
-
-    // Animation loop
-    let animationFrameId: number;
-    const animate = (time: number) => {
-      drawFibonacciSpiral(time);
-      animationFrameId = requestAnimationFrame(animate);
-    };
-    
-    animate(0);
-
-    return () => {
-      window.removeEventListener("resize", setSize);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 w-full h-full -z-10"
-      style={{ touchAction: 'none' }}
-    />
+    <div className="fixed inset-0 -z-10 overflow-hidden">
+      <svg
+        className="absolute w-full h-full animate-wave"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0,50 Q25,45 50,50 T100,50"
+          className="stroke-primary/20 fill-none"
+          strokeWidth="0.2"
+        />
+        <path
+          d="M0,55 Q25,50 50,55 T100,55"
+          className="stroke-primary/15 fill-none"
+          strokeWidth="0.2"
+        />
+        <path
+          d="M0,60 Q25,55 50,60 T100,60"
+          className="stroke-primary/10 fill-none"
+          strokeWidth="0.2"
+        />
+        <path
+          d="M0,65 Q25,60 50,65 T100,65"
+          className="stroke-primary/5 fill-none"
+          strokeWidth="0.2"
+        />
+        {/* Fibonacci spiral approximation using curved paths */}
+        <path
+          d="M50,50 Q60,50 65,45 T70,35 T65,25 T55,20 T40,25 T35,35 T40,45 T50,50"
+          className="stroke-primary/10 fill-none"
+          strokeWidth="0.1"
+        />
+        <path
+          d="M45,55 Q55,55 60,50 T65,40 T60,30 T50,25 T35,30 T30,40 T35,50 T45,55"
+          className="stroke-primary/10 fill-none"
+          strokeWidth="0.1"
+        />
+      </svg>
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
+    </div>
   );
 };

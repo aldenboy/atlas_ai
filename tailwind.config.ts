@@ -75,11 +75,17 @@ export default {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        wave: {
+          "0%": { transform: "rotate(0deg)" },
+          "50%": { transform: "rotate(3deg)" },
+          "100%": { transform: "rotate(0deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         float: "float 3s ease-in-out infinite",
+        wave: "wave 8s ease-in-out infinite",
       },
     },
   },
