@@ -40,24 +40,35 @@ export const Hero = () => {
             generates creative content, and helps you solve complex problems.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100">
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
             {!isAuthenticated ? (
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="border-white text-white hover:bg-white/10"
-                onClick={() => navigate("/auth")}
-              >
-                Sign In
-                <LogIn className="ml-2 h-4 w-4" />
-              </Button>
+              <>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="bg-white text-indigo-600 hover:bg-gray-100 font-semibold"
+                  onClick={() => navigate("/auth")}
+                >
+                  Sign In
+                  <LogIn className="ml-2 h-4 w-4" />
+                </Button>
+                <Button 
+                  size="lg" 
+                  className="bg-indigo-500 text-white hover:bg-indigo-400"
+                >
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </>
             ) : (
-              <Button variant="link" className="text-white hover:text-gray-200">
-                Learn more →
-              </Button>
+              <>
+                <Button size="lg" className="bg-white text-indigo-600 hover:bg-gray-100">
+                  Get Started
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button variant="link" className="text-white hover:text-gray-200">
+                  Learn more →
+                </Button>
+              </>
             )}
           </div>
         </div>
