@@ -1,9 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
-import Landing from "@/pages/Landing";
 import Community from "@/pages/Community";
+import { Auth } from "@/components/auth/Auth";
+import "./App.css";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -15,35 +17,21 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => {
-  // Check if we're on atlas.lovable.app
-  const isAtlasDomain = window.location.hostname === 'atlas.lovable.app';
-
-  // If we're on atlas.lovable.app, we want to show the Index component
-  if (isAtlasDomain) {
-    return (
+function App() {
+  return (
+    <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <Index />
+        <Router>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/community" element={<Community />} />
+          </Routes>
+        </Router>
         <Toaster />
       </QueryClientProvider>
-    );
-  }
-
-  // Otherwise, show the regular router setup
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/app" element={<Index />} />
-          <Route path="/community" element={<Community />} />
-          {/* Catch all other routes and redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-      <Toaster />
-    </QueryClientProvider>
+    </React.StrictMode>
   );
-};
+}
 
 export default App;

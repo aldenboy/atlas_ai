@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,19 +6,36 @@ import { Button } from "@/components/ui/button";
 import { Plus, TrendingUp, Clock, Star, ArrowRight } from "lucide-react";
 import { DiscussionThread } from "./DiscussionThread";
 import { NewDiscussionForm } from "./NewDiscussionForm";
+import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 type SortOption = "trending" | "new" | "top";
 
 interface DiscussionForumProps {
   showAllTopics?: boolean;
+  onAuthRequired?: () => void;
 }
 
-export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps) => {
+export const DiscussionForum = ({ showAllTopics = false, onAuthRequired }: DiscussionForumProps) => {
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("trending");
-  const isMobile = useIsMobile();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserId(session?.user.id || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const { data: discussions, isLoading } = useQuery({
     queryKey: ["discussions", sortBy],
@@ -57,37 +74,49 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
     }
   });
 
+  const handleNewDiscussion = () => {
+    if (!userId) {
+      if (onAuthRequired) {
+        onAuthRequired();
+      } else {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to create a discussion.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+    setShowNewDiscussion(true);
+  };
+
   return (
     <Card className="border-none shadow-none bg-transparent">
-      <CardHeader className={`flex flex-row items-center justify-between ${isMobile ? 'px-2 py-3' : 'px-0'}`}>
-        <CardTitle className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>Community</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between px-0">
+        <CardTitle className="text-2xl font-bold">Community</CardTitle>
         <div className="flex gap-2">
-          <Button 
-            onClick={() => setShowNewDiscussion(true)} 
-            size={isMobile ? "sm" : "default"}
-            className="bg-primary hover:bg-primary/90"
-          >
-            <Plus className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} mr-2`} />
-            {isMobile ? "New" : "New Discussion"}
+          <Button onClick={handleNewDiscussion} size="sm" className="bg-primary hover:bg-primary/90">
+            <Plus className="w-4 h-4 mr-2" />
+            New Discussion
           </Button>
           {!showAllTopics && (
-            <Button asChild size={isMobile ? "sm" : "default"} variant="outline">
+            <Button asChild size="sm" variant="outline">
               <Link to="/community">
-                {isMobile ? "All" : "View All"}
-                <ArrowRight className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} ml-2`} />
+                View All
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent className={`${isMobile ? 'px-2' : 'px-0'}`}>
+      <CardContent className="px-0">
         {showAllTopics && (
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          <div className="flex gap-2 mb-6">
             <Button
               variant={sortBy === "trending" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSortBy("trending")}
-              className={`text-sm whitespace-nowrap ${isMobile ? 'px-2' : ''}`}
+              className="text-sm"
             >
               <TrendingUp className="w-4 h-4 mr-1" />
               Trending
@@ -96,7 +125,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
               variant={sortBy === "new" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSortBy("new")}
-              className={`text-sm whitespace-nowrap ${isMobile ? 'px-2' : ''}`}
+              className="text-sm"
             >
               <Clock className="w-4 h-4 mr-1" />
               New
@@ -105,7 +134,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
               variant={sortBy === "top" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSortBy("top")}
-              className={`text-sm whitespace-nowrap ${isMobile ? 'px-2' : ''}`}
+              className="text-sm"
             >
               <Star className="w-4 h-4 mr-1" />
               Top
@@ -113,7 +142,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {discussions?.map((discussion) => (
             <DiscussionThread key={discussion.id} discussion={discussion} />
           ))}
