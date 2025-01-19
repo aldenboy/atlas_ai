@@ -1,11 +1,11 @@
 export interface PriceData {
   timestamp: number;
-  dominance: number;
+  price: number;
 }
 
 export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
   const response = await fetch(
-    `https://api.coingecko.com/api/v3/global/bitcoin/dominance?days=1`
+    `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=1`
   );
   
   if (!response.ok) {
@@ -13,9 +13,9 @@ export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
   }
   
   const data = await response.json();
-  return data.dominance_chart.map(([timestamp, dominance]: [number, number]) => ({
+  return data.prices.map(([timestamp, price]: [number, number]) => ({
     timestamp,
-    dominance,
+    price,
   }));
 };
 

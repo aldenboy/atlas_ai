@@ -6,10 +6,11 @@ import { ChartConfig } from "./ChartConfig";
 
 interface PriceLineChartProps {
   data: PriceData[];
+  symbol: string;
   config: ChartConfig;
 }
 
-export const PriceLineChart = ({ data, config }: PriceLineChartProps) => {
+export const PriceLineChart = ({ data, symbol, config }: PriceLineChartProps) => {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
@@ -30,10 +31,10 @@ export const PriceLineChart = ({ data, config }: PriceLineChartProps) => {
         />
         <YAxis
           domain={['auto', 'auto']}
-          tickFormatter={(value) => `${value.toFixed(2)}%`}
+          tickFormatter={(value) => `$${value.toLocaleString()}`}
           className="text-muted-foreground"
           label={{ 
-            value: 'Dominance (%)', 
+            value: 'Price (USD)', 
             angle: -90, 
             position: 'left',
             offset: 10,
@@ -43,9 +44,9 @@ export const PriceLineChart = ({ data, config }: PriceLineChartProps) => {
         <Tooltip content={ChartTooltipContent} />
         <Legend />
         <Line
-          name="Bitcoin Dominance"
+          name={`${symbol.charAt(0).toUpperCase() + symbol.slice(1)} Price`}
           type="monotone"
-          dataKey="dominance"
+          dataKey="price"
           stroke={`var(--color-${Object.keys(config)[0]})`}
           strokeWidth={2}
           dot={false}
