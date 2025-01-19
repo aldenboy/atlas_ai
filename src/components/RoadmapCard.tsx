@@ -3,22 +3,6 @@ import { CheckCircle2, Circle } from "lucide-react";
 
 const roadmapItems = [
   {
-    quarter: "Q2 2024",
-    features: [
-      { name: "Advanced Market Analysis", completed: true },
-      { name: "Real-time Trading Signals", completed: true },
-      { name: "Community Discussion Forums", completed: true },
-    ],
-  },
-  {
-    quarter: "Q3 2024",
-    features: [
-      { name: "Portfolio Management Tools", completed: false },
-      { name: "Custom Trading Strategies", completed: false },
-      { name: "AI-Powered Price Predictions", completed: false },
-    ],
-  },
-  {
     quarter: "Q4 2024",
     features: [
       { name: "Multi-Exchange Integration", completed: false },
@@ -29,9 +13,25 @@ const roadmapItems = [
   {
     quarter: "Q1 2025",
     features: [
+      { name: "Token Launch on Moonshot", completed: false },
       { name: "Social Trading Features", completed: false },
-      { name: "Mobile App Release", completed: false },
-      { name: "Advanced API Access", completed: false },
+      { name: "Mobile App Beta", completed: false },
+    ],
+  },
+  {
+    quarter: "Q2 2025",
+    features: [
+      { name: "Advanced Portfolio Analytics", completed: false },
+      { name: "Cross-Chain Integration", completed: false },
+      { name: "Institutional API Access", completed: false },
+    ],
+  },
+  {
+    quarter: "Q3 2025",
+    features: [
+      { name: "Decentralized Identity Integration", completed: false },
+      { name: "AI-Powered Trading Strategies", completed: false },
+      { name: "Community Governance Launch", completed: false },
     ],
   },
 ];
