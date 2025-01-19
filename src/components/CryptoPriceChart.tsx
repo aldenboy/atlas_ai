@@ -7,13 +7,12 @@ import { ChartError } from "./chart/ChartError";
 import { PriceLineChart } from "./chart/PriceLineChart";
 import { NeonGlowFilter } from "./chart/NeonGlowFilter";
 
-export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) => {
-  const { data: priceData, isLoading, error } = useQuery({
-    queryKey: ['crypto-chart', symbol.toLowerCase()], // Ensure consistent casing
-    queryFn: () => fetchCryptoData(symbol.toLowerCase()),
+export const CryptoPriceChart = () => {
+  const { data: dominanceData, isLoading, error } = useQuery({
+    queryKey: ['btc-dominance-chart'],
+    queryFn: () => fetchCryptoData(),
     refetchInterval: 60000, // Refresh every minute
     staleTime: 30000,
-    enabled: !!symbol, // Only run query when symbol is available
   });
 
   if (isLoading) {
@@ -25,11 +24,11 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
   }
 
   const config = {
-    price: {
-      label: `${symbol.charAt(0).toUpperCase() + symbol.slice(1)} Price`,
+    dominance: {
+      label: 'Bitcoin Dominance',
       theme: {
-        light: '#646cff',
-        dark: '#646cff'
+        light: '#f7931a',
+        dark: '#f7931a'
       }
     }
   };
@@ -40,8 +39,7 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
         <NeonGlowFilter />
         <ChartContainer config={config}>
           <PriceLineChart 
-            data={priceData} 
-            symbol={symbol}
+            data={dominanceData} 
             config={config}
           />
         </ChartContainer>

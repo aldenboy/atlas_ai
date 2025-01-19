@@ -8,34 +8,9 @@ import { LogOut } from "lucide-react";
 import { AuthProjectOverview } from "@/components/auth/AuthProjectOverview";
 import { useAuth } from "@/contexts/AuthContext";
 import { CryptoPriceChart } from "@/components/CryptoPriceChart";
-import { useChat } from "@/hooks/useChat";
-import { useEffect, useState } from "react";
 
 const Index = () => {
   const { session, signOut } = useAuth();
-  const { currentTicker } = useChat();
-  const [chartSymbol, setChartSymbol] = useState('bitcoin');
-
-  useEffect(() => {
-    if (currentTicker) {
-      // Map common ticker symbols to their CoinGecko IDs
-      const tickerMap: { [key: string]: string } = {
-        'BTC': 'bitcoin',
-        'ETH': 'ethereum',
-        'SOL': 'solana',
-        'XRP': 'ripple',
-        'DOGE': 'dogecoin',
-        'ADA': 'cardano',
-        'DOT': 'polkadot',
-        'LINK': 'chainlink',
-        'UNI': 'uniswap',
-        'AAVE': 'aave',
-      };
-      
-      const geckoId = tickerMap[currentTicker.toUpperCase()] || currentTicker.toLowerCase();
-      setChartSymbol(geckoId);
-    }
-  }, [currentTicker]);
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-x-hidden">
@@ -58,7 +33,7 @@ const Index = () => {
         <div className="grid md:grid-cols-2 gap-8">
           <div className="w-full h-full flex">
             <div className="w-full">
-              <CryptoPriceChart symbol={chartSymbol} />
+              <CryptoPriceChart />
             </div>
           </div>
           <div className="w-full h-full flex">
