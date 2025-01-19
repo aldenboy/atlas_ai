@@ -9,13 +9,42 @@ type NewsItem = {
   category: 'market' | 'economy' | 'company';
 };
 
+// Fallback news data in case the API fails
+const fallbackNews: NewsItem[] = [
+  {
+    id: '1',
+    text: 'Bitcoin Reaches New Milestone in Market Adoption',
+    category: 'market'
+  },
+  {
+    id: '2',
+    text: 'Global Markets Show Strong Recovery Signs',
+    category: 'economy'
+  },
+  {
+    id: '3',
+    text: 'Major Tech Companies Embrace Blockchain Technology',
+    category: 'company'
+  },
+  {
+    id: '4',
+    text: 'DeFi Protocols See Surge in Total Value Locked',
+    category: 'market'
+  },
+  {
+    id: '5',
+    text: 'New Regulatory Framework Proposed for Digital Assets',
+    category: 'economy'
+  }
+];
+
 const fetchNews = async () => {
   try {
     const { data, error } = await supabase.functions.invoke('fetch-news');
     
     if (error) {
       console.error('Supabase function error:', error);
-      return [];
+      return fallbackNews;
     }
 
     return (data?.articles || []).slice(0, 6).map((article: any) => ({
@@ -25,7 +54,7 @@ const fetchNews = async () => {
     }));
   } catch (error) {
     console.error('Failed to fetch news:', error);
-    return [];
+    return fallbackNews;
   }
 };
 
@@ -33,20 +62,16 @@ export const NewsTickerTape = () => {
   const { data: news, error, isLoading } = useQuery({
     queryKey: ['news'],
     queryFn: fetchNews,
-    refetchInterval: 300000, // Refresh every 5 minutes
-    retry: 2,
+    refetchInterval: 900000, // Refresh every 15 minutes instead of 5 to avoid rate limits
+    retry: 1,
+    initialData: fallbackNews
   });
 
   if (error) {
     console.error('Error fetching news:', error);
   }
 
-  // Provide fallback content if there's no news
-  const newsItems = news || [{
-    id: 'default',
-    text: 'Welcome to ATLAS - Your AI Trading Assistant',
-    category: 'market' as const
-  }];
+  const newsItems = news || fallbackNews;
 
   if (isLoading) {
     return (
