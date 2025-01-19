@@ -1,15 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart3, Shield } from "lucide-react";
 
 export const AuthProjectOverview = () => {
   return (
     <Card className="bg-background/50 backdrop-blur-sm border-primary/20 min-h-[400px] md:h-[500px] flex flex-col">
       <CardHeader className="space-y-2 md:space-y-4">
-        <div className="flex items-center justify-center">
-          <img 
-            src="/lovable-uploads/6c0018a5-7e4b-44eb-8ac7-f18fefc2076a.png" 
-            alt="ATLAS Logo" 
-            className="h-12 w-auto mb-2"
-          />
+        <div className="flex items-center justify-center gap-2">
+          <Shield className="h-8 w-8 text-primary" />
+          <BarChart3 className="h-8 w-8 text-primary" />
         </div>
         <CardTitle className="text-center text-xl md:text-2xl">
           Automated Trading and Learning Analysis System
