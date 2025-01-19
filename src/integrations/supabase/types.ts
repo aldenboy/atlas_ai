@@ -260,6 +260,33 @@ export type Database = {
         }
         Relationships: []
       }
+      research_papers: {
+        Row: {
+          created_at: string | null
+          file_path: string
+          id: string
+          title: string
+          token_symbol: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_path: string
+          id?: string
+          title: string
+          token_symbol: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_path?: string
+          id?: string
+          title?: string
+          token_symbol?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

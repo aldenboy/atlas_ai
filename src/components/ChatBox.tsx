@@ -5,7 +5,7 @@ import { ChatHeader } from "./chat/ChatHeader";
 import { ChatMessages } from "./chat/ChatMessages";
 import { ChatInput } from "./chat/ChatInput";
 import { Button } from "./ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Download } from "lucide-react";
 
 interface Message {
   text: string;
@@ -24,6 +24,38 @@ export const ChatBox = () => {
   const [currentTicker, setCurrentTicker] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  const handleDownloadPaper = async (filePath: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('research_papers')
+        .download(filePath);
+      
+      if (error) throw error;
+
+      // Create a download link
+      const url = window.URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filePath.split('/').pop() || 'research-paper.md';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Success",
+        description: "Research paper downloaded successfully.",
+      });
+    } catch (error: any) {
+      console.error('Error downloading paper:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download research paper. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleRefresh = () => {
     setMessages([
@@ -89,7 +121,7 @@ export const ChatBox = () => {
         
         const { data, error } = await supabase.functions.invoke('chat-with-atlas', {
           body: { 
-            message: `The user has selected ${ticker} as their asset of interest. Please acknowledge this and provide a comprehensive analysis.`,
+            message: `The user has selected ${ticker} as their asset of interest. Please provide a comprehensive analysis starting with token information.`,
             currentTicker: ticker
           }
         });
@@ -175,7 +207,10 @@ export const ChatBox = () => {
           Shill Me!
         </Button>
       </div>
-      <ChatMessages messages={messages} />
+      <ChatMessages 
+        messages={messages} 
+        onDownloadPaper={handleDownloadPaper}
+      />
       <ChatInput
         message={message}
         currentTicker={currentTicker}
