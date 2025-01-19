@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { AuthProjectOverview } from "@/components/auth/AuthProjectOverview";
 import { useAuth } from "@/contexts/AuthContext";
+import { CryptoPriceChart } from "@/components/CryptoPriceChart";
 
 const Index = () => {
   const { session, signOut } = useAuth();
@@ -28,6 +29,11 @@ const Index = () => {
             <AuthProjectOverview />
           </div>
         </div>
+        
+        <div className="mb-8">
+          <CryptoPriceChart />
+        </div>
+        
         <div className="w-full">
           <DiscussionForum showAllTopics={false} />
         </div>
