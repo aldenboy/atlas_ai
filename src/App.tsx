@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
+import Community from "@/pages/Community";
 import { Auth } from "@/components/auth/Auth";
 import { AuthRoute } from "@/components/auth/AuthRoute";
 import "./App.css";
@@ -29,6 +30,14 @@ function App() {
               element={
                 <AuthRoute>
                   <Index />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/community"
+              element={
+                <AuthRoute>
+                  <Community />
                 </AuthRoute>
               }
             />

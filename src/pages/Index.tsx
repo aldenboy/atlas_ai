@@ -54,7 +54,7 @@ const Index = () => {
           <ChatBox />
         </div>
         <div className="w-full">
-          <DiscussionForum />
+          <DiscussionForum showAllTopics={false} />
         </div>
       </main>
       
