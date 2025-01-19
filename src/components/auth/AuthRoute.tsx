@@ -1,100 +1,110 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
 export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Clear all session data and storage
   const clearSession = async () => {
     try {
-      // Clear all Supabase-related items from localStorage
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('sb-')) {
           localStorage.removeItem(key);
         }
       });
       
-      // Force a clean signout without trying to call the API
       await supabase.auth.signOut({ scope: 'local' });
     } catch (error) {
       console.error("Error clearing session:", error);
     }
     
-    // Always navigate to auth page after cleanup
     navigate("/auth");
   };
 
   useEffect(() => {
     let mounted = true;
 
-    // Check initial session
     const checkAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("Auth error:", error);
-          await clearSession();
+          if (location.pathname !== "/") {
+            await clearSession();
+          }
           return;
         }
 
         if (!session) {
-          await clearSession();
+          if (location.pathname !== "/") {
+            await clearSession();
+          }
           return;
         }
 
-        // Verify the session is still valid
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
         if (userError || !user) {
           console.error("User verification error:", userError);
-          await clearSession();
+          if (location.pathname !== "/") {
+            await clearSession();
+          }
           return;
         }
 
         if (mounted) {
+          setIsAuthenticated(true);
           setIsLoading(false);
         }
       } catch (error) {
         console.error("Session check error:", error);
-        await clearSession();
+        if (location.pathname !== "/") {
+          await clearSession();
+        }
+      } finally {
+        if (mounted && location.pathname === "/") {
+          setIsLoading(false);
+        }
       }
     };
 
     checkAuth();
 
-    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       
       console.log("Auth state changed:", event);
       
       if (event === 'SIGNED_OUT') {
-        await clearSession();
+        if (location.pathname !== "/") {
+          await clearSession();
+        }
         return;
       }
       
       if (event === 'SIGNED_IN' && session) {
+        setIsAuthenticated(true);
         setIsLoading(false);
         return;
       }
 
-      // Handle token refresh
       if (event === 'TOKEN_REFRESHED') {
         console.log("Token refreshed");
         checkAuth();
       }
     });
 
-    // Cleanup
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   if (isLoading) {
     return (
@@ -104,5 +114,11 @@ export const AuthRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return <>{children}</>;
+  // Allow public access to homepage
+  if (location.pathname === "/" && !isAuthenticated) {
+    return <>{children}</>;
+  }
+
+  // Require authentication for other routes
+  return isAuthenticated ? <>{children}</> : null;
 };

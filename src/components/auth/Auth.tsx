@@ -8,9 +8,13 @@ import { useNavigate } from "react-router-dom";
 import { FibonacciBackground } from "@/components/FibonacciBackground";
 import { Button } from "@/components/ui/button";
 import { Rocket } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Auth = () => {
   const [errorMessage, setErrorMessage] = useState("");
+  const [username, setUsername] = useState("");
+  const [view, setView] = useState<"sign_in" | "sign_up">("sign_in");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +26,29 @@ export const Auth = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username: username,
+          },
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      setErrorMessage(error.message);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -73,8 +100,12 @@ export const Auth = () => {
 
           <Card className="bg-background/50 backdrop-blur-sm border-primary/20">
             <CardHeader>
-              <CardTitle>Sign In</CardTitle>
-              <CardDescription>Access your account or create a new one</CardDescription>
+              <CardTitle>{view === "sign_up" ? "Sign Up" : "Sign In"}</CardTitle>
+              <CardDescription>
+                {view === "sign_up" 
+                  ? "Create your account to join our community" 
+                  : "Access your account or create a new one"}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {errorMessage && (
@@ -82,22 +113,80 @@ export const Auth = () => {
                   <AlertDescription>{errorMessage}</AlertDescription>
                 </Alert>
               )}
-              <SupabaseAuth
-                supabaseClient={supabase}
-                appearance={{ 
-                  theme: ThemeSupa,
-                  variables: {
-                    default: {
-                      colors: {
-                        brand: 'rgb(168, 85, 247)',
-                        brandAccent: 'rgb(147, 51, 234)',
+              {view === "sign_up" ? (
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Choose a username"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="Choose a password"
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">Sign Up</Button>
+                  <p className="text-sm text-center text-muted-foreground">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setView("sign_in")}
+                      className="text-primary hover:underline"
+                    >
+                      Sign In
+                    </button>
+                  </p>
+                </form>
+              ) : (
+                <>
+                  <SupabaseAuth
+                    supabaseClient={supabase}
+                    appearance={{ 
+                      theme: ThemeSupa,
+                      variables: {
+                        default: {
+                          colors: {
+                            brand: 'rgb(168, 85, 247)',
+                            brandAccent: 'rgb(147, 51, 234)',
+                          },
+                        },
                       },
-                    },
-                  },
-                }}
-                theme="dark"
-                providers={[]}
-              />
+                    }}
+                    theme="dark"
+                    providers={[]}
+                  />
+                  <p className="text-sm text-center text-muted-foreground mt-4">
+                    Don't have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => setView("sign_up")}
+                      className="text-primary hover:underline"
+                    >
+                      Sign Up
+                    </button>
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

@@ -25,14 +25,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/"
-              element={
-                <AuthRoute>
-                  <Index />
-                </AuthRoute>
-              }
-            />
+            <Route path="/" element={<Index />} />
             <Route
               path="/community"
               element={
