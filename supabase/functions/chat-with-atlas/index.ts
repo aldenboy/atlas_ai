@@ -80,7 +80,7 @@ async function callOpenAI(prompt: string, context: string = '', marketData: any 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4', // Fixed the model name here
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: context ? `${context}\n${enhancedPrompt}` : enhancedPrompt }
