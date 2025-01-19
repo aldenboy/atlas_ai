@@ -1,16 +1,11 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-
-interface Message {
-  text: string;
-  isUser: boolean;
-  paper?: string;
-}
+import { ChatMessage } from "@/types/chat";
 
 export const useChat = () => {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     { 
       text: "Hello! I'm ATLAS (Automated Trading and Learning Analysis System). To get started, please enter a ticker symbol (e.g., BTC, ETH) or project name you'd like me to research.", 
       isUser: false 

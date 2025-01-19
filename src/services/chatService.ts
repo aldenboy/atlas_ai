@@ -1,8 +1,9 @@
 import { atlasService } from "@/services/atlasService";
 import { useToast } from "@/components/ui/use-toast";
+import { ChatMessage } from "@/types/chat";
 
 export const handleShillRequest = async (
-  setMessages: (messages: any[]) => void,
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   toast: ReturnType<typeof useToast>["toast"]
 ) => {
   try {
@@ -31,7 +32,7 @@ export const handleChatSubmission = async (
   message: string,
   currentTicker: string | null,
   setCurrentTicker: (ticker: string | null) => void,
-  setMessages: (messages: any[]) => void,
+  setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   toast: ReturnType<typeof useToast>["toast"]
 ) => {
   try {
