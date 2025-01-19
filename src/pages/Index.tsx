@@ -10,36 +10,27 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
 const Index = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-      }
-      setIsLoading(false);
+      setIsAuthenticated(!!session);
     };
 
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        navigate("/auth");
-      }
+      setIsAuthenticated(!!session);
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
-
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-x-hidden">
@@ -62,12 +53,14 @@ const Index = () => {
         <TickerTape />
       </div>
 
-      <div className="fixed bottom-4 right-4 z-50">
-        <Button variant="outline" size="sm" onClick={handleSignOut} className="bg-background/50 backdrop-blur-sm">
-          <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
-        </Button>
-      </div>
+      {isAuthenticated && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button variant="outline" size="sm" onClick={handleSignOut} className="bg-background/50 backdrop-blur-sm">
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
