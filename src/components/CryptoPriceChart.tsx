@@ -1,35 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import { Card } from "@/components/ui/card";
-
-interface PriceData {
-  timestamp: number;
-  price: number;
-}
-
-const fetchCryptoData = async (symbol: string = 'bitcoin') => {
-  const response = await fetch(
-    `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=1`
-  );
-  
-  if (!response.ok) {
-    throw new Error('Failed to fetch crypto data');
-  }
-  
-  const data = await response.json();
-  return data.prices.map(([timestamp, price]: [number, number]) => ({
-    timestamp,
-    price,
-  }));
-};
-
-const formatTime = (timestamp: number) => {
-  return new Date(timestamp).toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
-};
+import { fetchCryptoData, formatTime } from "@/utils/cryptoData";
+import { ChartTooltipContent } from "./chart/ChartTooltipContent";
+import { NeonGlowFilter } from "./chart/NeonGlowFilter";
 
 export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) => {
   const { data: priceData, isLoading, error } = useQuery({
@@ -72,18 +47,7 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
   return (
     <Card className="p-4">
       <div className="h-[400px]">
-        <svg className="absolute">
-          <defs>
-            <filter id="neon-glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-              <feMerge>
-                <feMergeNode in="coloredBlur" />
-                <feMergeNode in="coloredBlur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-        </svg>
+        <NeonGlowFilter />
         <ChartContainer config={config}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={priceData}>
@@ -98,22 +62,7 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
                 tickFormatter={(value) => `$${value.toLocaleString()}`}
                 className="text-muted-foreground"
               />
-              <ChartTooltip
-                content={({ active, payload }) => {
-                  if (!active || !payload?.length) return null;
-                  const data = payload[0].payload as PriceData;
-                  return (
-                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="font-medium">Time:</div>
-                        <div>{formatTime(data.timestamp)}</div>
-                        <div className="font-medium">Price:</div>
-                        <div>${data.price.toLocaleString()}</div>
-                      </div>
-                    </div>
-                  );
-                }}
-              />
+              <Tooltip content={ChartTooltipContent} />
               <Line
                 type="monotone"
                 dataKey="price"
