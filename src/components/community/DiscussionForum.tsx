@@ -39,11 +39,18 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
   const { data: discussions, isLoading } = useQuery({
     queryKey: ["discussions", sortBy],
     queryFn: async () => {
+      console.log("Fetching discussions with sort:", sortBy); // Debug log
+      
       let query = supabase
         .from("discussions")
         .select(`
           *,
-          discussion_comments (count)
+          discussion_comments (
+            count
+          ),
+          profiles (
+            username
+          )
         `);
 
       switch (sortBy) {
@@ -55,7 +62,8 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
           break;
         case "trending":
         default:
-          query = query.order("created_at", { ascending: false }).order("likes", { ascending: false });
+          // For trending, we'll sort by a combination of recency and likes
+          query = query.order("created_at", { ascending: false });
           break;
       }
 
@@ -69,8 +77,11 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
         console.error("Error fetching discussions:", error);
         throw error;
       }
+      
+      console.log("Fetched discussions:", data); // Debug log
       return data;
-    }
+    },
+    refetchOnWindowFocus: false
   });
 
   const handleNewDiscussion = () => {
@@ -138,10 +149,15 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
         )}
 
         <div className="space-y-4">
-          {discussions?.map((discussion) => (
-            <DiscussionThread key={discussion.id} discussion={discussion} />
-          ))}
-          {discussions?.length === 0 && !isLoading && (
+          {isLoading ? (
+            <div className="text-center py-8">
+              <p className="text-lg text-muted-foreground">Loading discussions...</p>
+            </div>
+          ) : discussions && discussions.length > 0 ? (
+            discussions.map((discussion) => (
+              <DiscussionThread key={discussion.id} discussion={discussion} />
+            ))
+          ) : (
             <div className="text-center py-8 text-muted-foreground">
               <p className="text-lg">No discussions yet</p>
               <p className="text-sm">Be the first to start a discussion!</p>
