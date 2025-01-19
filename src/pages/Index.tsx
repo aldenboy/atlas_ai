@@ -49,13 +49,6 @@ const Index = () => {
         <NewsTickerTape />
       </div>
       
-      <div className="absolute top-4 right-4 z-20">
-        <Button variant="outline" size="sm" onClick={handleSignOut}>
-          <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
-        </Button>
-      </div>
-      
       <main className="flex-1 container mx-auto px-4 py-16 relative z-10">
         <div className="max-w-3xl mx-auto w-full mb-8">
           <ChatBox />
@@ -67,6 +60,13 @@ const Index = () => {
       
       <div className="sticky bottom-0 w-full z-10">
         <TickerTape />
+      </div>
+
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button variant="outline" size="sm" onClick={handleSignOut} className="bg-background/50 backdrop-blur-sm">
+          <LogOut className="w-4 h-4 mr-2" />
+          Sign Out
+        </Button>
       </div>
     </div>
   );
