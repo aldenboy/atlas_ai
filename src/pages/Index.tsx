@@ -42,9 +42,10 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-[100dvh] flex flex-col relative">
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
       <NeuralBackground />
-      <div className="w-screen fixed top-0 z-10">
+      
+      <div className="sticky top-0 w-full z-10">
         <NewsTickerTape />
       </div>
       
@@ -55,16 +56,16 @@ const Index = () => {
         </Button>
       </div>
       
-      <div className="flex-1 container mx-auto mt-16 mb-16 flex flex-col gap-6 p-4">
-        <div className="max-w-3xl mx-auto w-full">
+      <main className="flex-1 container mx-auto px-4 py-16 relative z-10">
+        <div className="max-w-3xl mx-auto w-full mb-8">
           <ChatBox />
         </div>
         <div className="w-full">
           <DiscussionForum />
         </div>
-      </div>
+      </main>
       
-      <div className="w-screen fixed bottom-0">
+      <div className="sticky bottom-0 w-full z-10">
         <TickerTape />
       </div>
     </div>
