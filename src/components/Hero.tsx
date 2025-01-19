@@ -1,7 +1,28 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, LogIn } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Hero = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <div className="relative overflow-hidden bg-gradient-to-b from-indigo-600 to-purple-600 py-20 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
@@ -23,9 +44,21 @@ export const Hero = () => {
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button variant="link" className="text-white hover:text-gray-200">
-              Learn more →
-            </Button>
+            {!isAuthenticated ? (
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-white text-white hover:bg-white/10"
+                onClick={() => navigate("/auth")}
+              >
+                Sign In
+                <LogIn className="ml-2 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button variant="link" className="text-white hover:text-gray-200">
+                Learn more →
+              </Button>
+            )}
           </div>
         </div>
       </div>
