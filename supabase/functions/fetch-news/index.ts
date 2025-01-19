@@ -12,7 +12,6 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Fetching news from NewsAPI...');
     const apiKey = Deno.env.get('NEWS_API_KEY');
     
     if (!apiKey) {
@@ -20,37 +19,56 @@ serve(async (req) => {
       throw new Error('API key not configured');
     }
 
+    console.log('Fetching news from NewsAPI...');
+    
     const response = await fetch(
-      'https://newsapi.org/v2/top-headlines?country=us&category=business',
+      'https://newsapi.org/v2/top-headlines?country=us&category=business&pageSize=10',
       {
         headers: {
-          'Authorization': `Bearer ${apiKey}`
+          'X-Api-Key': apiKey
         }
       }
     );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('NewsAPI error:', errorText);
+      console.error('NewsAPI error:', response.status, errorText);
       throw new Error(`NewsAPI returned ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('Successfully fetched news articles');
+    
+    if (!data.articles || !Array.isArray(data.articles)) {
+      console.error('Invalid response format from NewsAPI:', data);
+      throw new Error('Invalid response format from NewsAPI');
+    }
+
+    console.log(`Successfully fetched ${data.articles.length} news articles`);
 
     return new Response(
       JSON.stringify(data),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 200 
       },
     );
+
   } catch (error) {
     console.error('Error in fetch-news function:', error);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: 'Failed to fetch news data'
+      }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json'
+        },
         status: 500
       },
     );
