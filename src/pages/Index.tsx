@@ -8,9 +8,20 @@ import { LogOut } from "lucide-react";
 import { AuthProjectOverview } from "@/components/auth/AuthProjectOverview";
 import { useAuth } from "@/contexts/AuthContext";
 import { CryptoPriceChart } from "@/components/CryptoPriceChart";
+import { useChat } from "@/hooks/useChat";
+import { useEffect, useState } from "react";
 
 const Index = () => {
   const { session, signOut } = useAuth();
+  const { currentTicker } = useChat();
+  const [chartSymbol, setChartSymbol] = useState('bitcoin');
+
+  // Update chart when Atlas changes the current ticker
+  useEffect(() => {
+    if (currentTicker) {
+      setChartSymbol(currentTicker.toLowerCase());
+    }
+  }, [currentTicker]);
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-x-hidden">
@@ -31,7 +42,7 @@ const Index = () => {
         </div>
         
         <div className="w-full mb-16">
-          <CryptoPriceChart />
+          <CryptoPriceChart symbol={chartSymbol} />
         </div>
         
         <div className="w-full">

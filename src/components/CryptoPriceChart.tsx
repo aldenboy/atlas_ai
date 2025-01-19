@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
 import { Card } from "@/components/ui/card";
 import { fetchCryptoData, formatTime } from "@/utils/cryptoData";
 import { ChartTooltipContent } from "./chart/ChartTooltipContent";
 import { NeonGlowFilter } from "./chart/NeonGlowFilter";
+import { useEffect } from "react";
 
 export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) => {
   const { data: priceData, isLoading, error } = useQuery({
@@ -36,7 +37,7 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
 
   const config = {
     price: {
-      label: 'Price',
+      label: `${symbol.charAt(0).toUpperCase() + symbol.slice(1)} Price (USD)`,
       theme: {
         light: '#7c3aed',
         dark: '#a78bfa',
@@ -50,20 +51,38 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
         <NeonGlowFilter />
         <ChartContainer config={config}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={priceData}>
+            <LineChart
+              data={priceData}
+              margin={{ top: 20, right: 30, left: 60, bottom: 20 }}
+            >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" />
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={formatTime}
                 className="text-muted-foreground"
+                label={{ 
+                  value: 'Time', 
+                  position: 'bottom',
+                  offset: 0,
+                  className: "text-muted-foreground"
+                }}
               />
               <YAxis
                 domain={['auto', 'auto']}
                 tickFormatter={(value) => `$${value.toLocaleString()}`}
                 className="text-muted-foreground"
+                label={{ 
+                  value: 'Price (USD)', 
+                  angle: -90, 
+                  position: 'left',
+                  offset: 10,
+                  className: "text-muted-foreground"
+                }}
               />
               <Tooltip content={ChartTooltipContent} />
+              <Legend />
               <Line
+                name={`${symbol.charAt(0).toUpperCase() + symbol.slice(1)} Price`}
                 type="monotone"
                 dataKey="price"
                 stroke="var(--color-price)"
