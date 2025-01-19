@@ -3,7 +3,13 @@ const tickerToGeckoId: { [key: string]: string } = {
   'ETH': 'ethereum',
   'SOL': 'solana',
   'XRP': 'ripple',
-  // Add more mappings as needed
+  'DOGE': 'dogecoin',
+  'ADA': 'cardano',
+  'DOT': 'polkadot',
+  'LINK': 'chainlink',
+  'UNI': 'uniswap',
+  'AAVE': 'aave',
+  // Add more common mappings
 };
 
 export const formatNumber = (num: number) => {
@@ -18,7 +24,29 @@ export const formatNumber = (num: number) => {
 
 export async function fetchTokenData(ticker: string) {
   try {
-    const geckoId = tickerToGeckoId[ticker.toUpperCase()] || ticker.toLowerCase();
+    // First try the mapping
+    let geckoId = tickerToGeckoId[ticker.toUpperCase()];
+    
+    if (!geckoId) {
+      // If not in mapping, try to search for the token
+      const searchResponse = await fetch(
+        `https://api.coingecko.com/api/v3/search?query=${ticker}`
+      );
+      
+      if (!searchResponse.ok) {
+        console.error('CoinGecko search API error:', await searchResponse.text());
+        return null;
+      }
+
+      const searchData = await searchResponse.json();
+      if (searchData.coins && searchData.coins.length > 0) {
+        geckoId = searchData.coins[0].id;
+      } else {
+        console.error('No matching token found for:', ticker);
+        return null;
+      }
+    }
+
     console.log('Fetching data for CoinGecko ID:', geckoId);
 
     const response = await fetch(

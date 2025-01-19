@@ -80,7 +80,7 @@ async function callOpenAI(prompt: string, context: string = '', marketData: any 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4', // Fixed the model name here
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: context ? `${context}\n${enhancedPrompt}` : enhancedPrompt }
@@ -138,7 +138,17 @@ serve(async (req) => {
       if (!marketData) {
         return new Response(
           JSON.stringify({
-            error: `Unable to fetch market data for ${currentTicker}. Please verify the ticker symbol.`
+            error: `I apologize, but I couldn't find market data for ${currentTicker}. This might be because:
+1. The ticker symbol might be incorrect
+2. The token might be too new or not listed on major exchanges
+3. The token might be using a different ticker on exchanges
+
+Would you like me to:
+1. Try analyzing a different token?
+2. Provide general information about ${currentTicker} without market data?
+3. Help you find the correct ticker symbol?
+
+Please let me know how you'd like to proceed.`
           }),
           { 
             status: 400,
