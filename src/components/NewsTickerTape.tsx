@@ -10,31 +10,51 @@ type NewsItem = {
 };
 
 const fetchNews = async () => {
-  const { data, error } = await supabase.functions.invoke('fetch-news');
-  
-  if (error) {
-    throw error;
-  }
+  try {
+    const { data, error } = await supabase.functions.invoke('fetch-news');
+    
+    if (error) {
+      console.error('Supabase function error:', error);
+      return [];
+    }
 
-  return data.articles.slice(0, 6).map((article: any) => ({
-    id: article.url,
-    text: article.title,
-    category: 'market' as const
-  }));
+    return (data?.articles || []).slice(0, 6).map((article: any) => ({
+      id: article.url,
+      text: article.title,
+      category: 'market' as const
+    }));
+  } catch (error) {
+    console.error('Failed to fetch news:', error);
+    return [];
+  }
 };
 
 export const NewsTickerTape = () => {
-  const { data: news, error } = useQuery({
+  const { data: news, error, isLoading } = useQuery({
     queryKey: ['news'],
     queryFn: fetchNews,
     refetchInterval: 300000, // Refresh every 5 minutes
+    retry: 2,
   });
 
   if (error) {
     console.error('Error fetching news:', error);
   }
 
-  const newsItems = news || [];
+  // Provide fallback content if there's no news
+  const newsItems = news || [{
+    id: 'default',
+    text: 'Welcome to ATLAS - Your AI Trading Assistant',
+    category: 'market' as const
+  }];
+
+  if (isLoading) {
+    return (
+      <div className="w-full bg-purple-900/50 border-b border-purple-500/20 p-2">
+        <div className="text-white/50">Loading news...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-purple-900/50 border-b border-purple-500/20 overflow-hidden">
