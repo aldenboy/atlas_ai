@@ -17,8 +17,8 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
 
   if (isLoading) {
     return (
-      <Card className="p-4 mb-12 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
-        <div className="h-[400px] flex items-center justify-center">
+      <Card className="p-4 mb-8 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
+        <div className="h-[300px] flex items-center justify-center">
           Loading chart data...
         </div>
       </Card>
@@ -27,8 +27,8 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
 
   if (error) {
     return (
-      <Card className="p-4 mb-12 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
-        <div className="h-[400px] flex items-center justify-center text-red-500">
+      <Card className="p-4 mb-8 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
+        <div className="h-[300px] flex items-center justify-center text-red-500">
           Error loading chart data
         </div>
       </Card>
@@ -46,8 +46,8 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
   };
 
   return (
-    <Card className="p-4 mb-12 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
-      <div className="h-[400px]">
+    <Card className="p-4 mb-8 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
+      <div className="h-[300px]">
         <NeonGlowFilter />
         <ChartContainer config={config}>
           <ResponsiveContainer width="100%" height="100%">
