@@ -15,7 +15,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+    <>
       <NeuralBackground />
       
       <div className="sticky top-0 w-full z-10">
@@ -36,7 +36,7 @@ const Index = () => {
       <div className="sticky bottom-0 w-full z-10">
         <TickerTape />
       </div>
-    </div>
+    </>
   );
 };
 
