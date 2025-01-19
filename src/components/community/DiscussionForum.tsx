@@ -7,6 +7,7 @@ import { Plus, TrendingUp, Clock, Star, ArrowRight } from "lucide-react";
 import { DiscussionThread } from "./DiscussionThread";
 import { NewDiscussionForm } from "./NewDiscussionForm";
 import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type SortOption = "trending" | "new" | "top";
 
@@ -17,6 +18,7 @@ interface DiscussionForumProps {
 export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps) => {
   const [showNewDiscussion, setShowNewDiscussion] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("trending");
+  const isMobile = useIsMobile();
 
   const { data: discussions, isLoading } = useQuery({
     queryKey: ["discussions", sortBy],
@@ -57,31 +59,35 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
 
   return (
     <Card className="border-none shadow-none bg-transparent">
-      <CardHeader className="flex flex-row items-center justify-between px-0">
-        <CardTitle className="text-2xl font-bold">Community</CardTitle>
+      <CardHeader className={`flex flex-row items-center justify-between ${isMobile ? 'px-2 py-3' : 'px-0'}`}>
+        <CardTitle className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold`}>Community</CardTitle>
         <div className="flex gap-2">
-          <Button onClick={() => setShowNewDiscussion(true)} size="sm" className="bg-primary hover:bg-primary/90">
-            <Plus className="w-4 h-4 mr-2" />
-            New Discussion
+          <Button 
+            onClick={() => setShowNewDiscussion(true)} 
+            size={isMobile ? "sm" : "default"}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Plus className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} mr-2`} />
+            {isMobile ? "New" : "New Discussion"}
           </Button>
           {!showAllTopics && (
-            <Button asChild size="sm" variant="outline">
+            <Button asChild size={isMobile ? "sm" : "default"} variant="outline">
               <Link to="/community">
-                View All
-                <ArrowRight className="w-4 h-4 ml-2" />
+                {isMobile ? "All" : "View All"}
+                <ArrowRight className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} ml-2`} />
               </Link>
             </Button>
           )}
         </div>
       </CardHeader>
-      <CardContent className="px-0">
+      <CardContent className={`${isMobile ? 'px-2' : 'px-0'}`}>
         {showAllTopics && (
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
             <Button
               variant={sortBy === "trending" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSortBy("trending")}
-              className="text-sm"
+              className={`text-sm whitespace-nowrap ${isMobile ? 'px-2' : ''}`}
             >
               <TrendingUp className="w-4 h-4 mr-1" />
               Trending
@@ -90,7 +96,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
               variant={sortBy === "new" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSortBy("new")}
-              className="text-sm"
+              className={`text-sm whitespace-nowrap ${isMobile ? 'px-2' : ''}`}
             >
               <Clock className="w-4 h-4 mr-1" />
               New
@@ -99,7 +105,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
               variant={sortBy === "top" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setSortBy("top")}
-              className="text-sm"
+              className={`text-sm whitespace-nowrap ${isMobile ? 'px-2' : ''}`}
             >
               <Star className="w-4 h-4 mr-1" />
               Top
@@ -107,7 +113,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {discussions?.map((discussion) => (
             <DiscussionThread key={discussion.id} discussion={discussion} />
           ))}

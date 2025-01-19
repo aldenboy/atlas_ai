@@ -5,6 +5,7 @@ import { ChatMessages } from "./chat/ChatMessages";
 import { ChatInput } from "./chat/ChatInput";
 import { ShillMeButton } from "./chat/ShillMeButton";
 import { handleShillRequest, handleChatSubmission } from "@/services/chatService";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const ChatBox = () => {
   const { 
@@ -21,6 +22,7 @@ export const ChatBox = () => {
   } = useChat();
   
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleShillMe = async () => {
     if (isLoading) return;
@@ -54,13 +56,13 @@ export const ChatBox = () => {
   };
 
   return (
-    <div className="w-full h-[100dvh] md:h-[500px] flex flex-col bg-black/30 backdrop-blur-md rounded-lg shadow-xl overflow-hidden border border-purple-500/20">
+    <div className={`w-full ${isMobile ? 'h-[80dvh]' : 'h-[500px]'} flex flex-col bg-black/30 backdrop-blur-md rounded-lg shadow-xl overflow-hidden border border-purple-500/20`}>
       <ChatHeader 
         currentTicker={currentTicker}
         onRefresh={handleRefresh}
         isLoading={isLoading}
       />
-      <div className="absolute top-4 right-20 z-10">
+      <div className={`absolute ${isMobile ? 'top-2 right-12' : 'top-4 right-20'} z-10`}>
         <ShillMeButton onClick={handleShillMe} disabled={isLoading} />
       </div>
       <ChatMessages 
