@@ -39,17 +39,17 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
   const { data: discussions, isLoading } = useQuery({
     queryKey: ["discussions", sortBy],
     queryFn: async () => {
-      console.log("Fetching discussions with sort:", sortBy); // Debug log
+      console.log("Fetching discussions with sort:", sortBy);
       
       let query = supabase
         .from("discussions")
         .select(`
           *,
-          discussion_comments (
-            count
-          ),
-          profiles (
-            username
+          discussion_comments (count),
+          user_id (
+            profiles (
+              username
+            )
           )
         `);
 
@@ -78,7 +78,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
         throw error;
       }
       
-      console.log("Fetched discussions:", data); // Debug log
+      console.log("Fetched discussions:", data);
       return data;
     },
     refetchOnWindowFocus: false
