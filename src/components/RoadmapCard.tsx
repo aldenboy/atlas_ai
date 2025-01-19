@@ -62,6 +62,14 @@ export const RoadmapCard = () => {
             </div>
           ))}
         </div>
+        <div className="mt-8 pt-4 border-t border-purple-500/20">
+          <p className="text-sm text-gray-400">
+            Solana Contract Address:{" "}
+            <span className="font-mono text-purple-300">
+              8ahAsRx8B7DKfzJFj5YiGqMxNv2AQpAfCddMYFsymoon
+            </span>
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
