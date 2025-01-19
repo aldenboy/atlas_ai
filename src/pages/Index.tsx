@@ -20,8 +20,8 @@ const Index = () => {
         <NewsTickerTape />
       </div>
       
-      <main className="flex-1 container mx-auto px-4 py-8 relative z-10 space-y-12">
-        <div className="grid md:grid-cols-2 gap-8">
+      <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
           <div className="w-full">
             <ChatBox />
           </div>
@@ -30,7 +30,7 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="w-full">
+        <div className="w-full mb-16">
           <CryptoPriceChart />
         </div>
         
