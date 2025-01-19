@@ -14,8 +14,7 @@ export const useDiscussions = (sortBy: SortOption, limit?: number) => {
         .from("discussions")
         .select(`
           *,
-          discussion_comments (count),
-          user:profiles!user_id(username)
+          discussion_comments (count)
         `);
 
       switch (sortBy) {
@@ -45,7 +44,7 @@ export const useDiscussions = (sortBy: SortOption, limit?: number) => {
       // Transform the data to match the Discussion type
       const discussions = data.map(item => ({
         ...item,
-        user: item.user ? { profile: { username: item.user.username } } : null
+        user: { id: item.user_id }
       }));
       
       console.log("Fetched discussions:", discussions);

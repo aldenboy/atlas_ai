@@ -15,9 +15,7 @@ export interface Discussion {
   created_at: string;
   user_id: string;
   user: {
-    profile: {
-      username: string;
-    };
+    id: string;
   } | null;
   discussion_comments: { count: number }[];
 }
@@ -54,7 +52,7 @@ export const DiscussionThread = ({ discussion }: { discussion: Discussion }) => 
                   {discussion.category}
                 </span>
                 <span>•</span>
-                <span>Posted by {discussion.user?.profile?.username || 'Anonymous'}</span>
+                <span>Posted by User {discussion.user_id.slice(0, 8)}</span>
                 <span>•</span>
                 <span>
                   {formatDistance(new Date(discussion.created_at), new Date(), { addSuffix: true })}
