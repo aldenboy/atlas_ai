@@ -8,6 +8,7 @@ import { NewsTickerTape } from "@/components/NewsTickerTape";
 import { DiscussionForum } from "@/components/community/DiscussionForum";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { AuthProjectOverview } from "@/components/auth/AuthProjectOverview";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,9 +41,14 @@ const Index = () => {
         <NewsTickerTape />
       </div>
       
-      <main className="flex-1 container mx-auto px-4 py-16 relative z-10">
-        <div className="max-w-3xl mx-auto w-full mb-8">
-          <ChatBox />
+      <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="w-full">
+            <ChatBox />
+          </div>
+          <div className="w-full md:mt-0 mt-4">
+            <AuthProjectOverview />
+          </div>
         </div>
         <div className="w-full">
           <DiscussionForum showAllTopics={false} />
