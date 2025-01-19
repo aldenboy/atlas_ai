@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, TrendingUp, Clock, Star, ArrowRight } from "lucide-react";
+import { Plus, ArrowRight } from "lucide-react";
 import { DiscussionThread } from "./DiscussionThread";
 import { NewDiscussionForm } from "./NewDiscussionForm";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
+import { SortControls } from "./SortControls";
+import { useDiscussions } from "@/hooks/useDiscussions";
 
 type SortOption = "trending" | "new" | "top";
 
@@ -20,6 +21,8 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
   const [userId, setUserId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>("trending");
   const { toast } = useToast();
+
+  const { data: discussions, isLoading } = useDiscussions(sortBy, showAllTopics ? undefined : 3);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -35,54 +38,6 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const { data: discussions, isLoading } = useQuery({
-    queryKey: ["discussions", sortBy],
-    queryFn: async () => {
-      console.log("Fetching discussions with sort:", sortBy);
-      
-      let query = supabase
-        .from("discussions")
-        .select(`
-          *,
-          discussion_comments (count),
-          user:user_id (
-            profile:profiles (
-              username
-            )
-          )
-        `);
-
-      switch (sortBy) {
-        case "new":
-          query = query.order("created_at", { ascending: false });
-          break;
-        case "top":
-          query = query.order("likes", { ascending: false });
-          break;
-        case "trending":
-        default:
-          // For trending, we'll sort by a combination of recency and likes
-          query = query.order("created_at", { ascending: false });
-          break;
-      }
-
-      if (!showAllTopics) {
-        query = query.limit(3);
-      }
-
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error("Error fetching discussions:", error);
-        throw error;
-      }
-      
-      console.log("Fetched discussions:", data);
-      return data;
-    },
-    refetchOnWindowFocus: false
-  });
 
   const handleNewDiscussion = () => {
     if (!userId) {
@@ -117,35 +72,7 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
       </CardHeader>
       <CardContent className="px-0">
         {showAllTopics && (
-          <div className="flex gap-2 mb-6">
-            <Button
-              variant={sortBy === "trending" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setSortBy("trending")}
-              className="text-sm"
-            >
-              <TrendingUp className="w-4 h-4 mr-1" />
-              Trending
-            </Button>
-            <Button
-              variant={sortBy === "new" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setSortBy("new")}
-              className="text-sm"
-            >
-              <Clock className="w-4 h-4 mr-1" />
-              New
-            </Button>
-            <Button
-              variant={sortBy === "top" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setSortBy("top")}
-              className="text-sm"
-            >
-              <Star className="w-4 h-4 mr-1" />
-              Top
-            </Button>
-          </div>
+          <SortControls sortBy={sortBy} onSortChange={setSortBy} />
         )}
 
         <div className="space-y-4">
