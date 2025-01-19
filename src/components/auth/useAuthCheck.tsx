@@ -10,18 +10,28 @@ export const useAuthCheck = () => {
 
   const clearSession = async () => {
     try {
+      // Clear all Supabase-related items from localStorage
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('sb-')) {
           localStorage.removeItem(key);
         }
       });
       
-      await supabase.auth.signOut({ scope: 'local' });
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      
+      // Reset state
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      
+      // Only redirect if not already on auth page
+      if (location.pathname !== "/auth") {
+        navigate("/auth", { replace: true });
+      }
     } catch (error) {
       console.error("Error clearing session:", error);
+      navigate("/auth", { replace: true });
     }
-    
-    navigate("/auth");
   };
 
   useEffect(() => {
@@ -29,30 +39,20 @@ export const useAuthCheck = () => {
 
     const checkAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (error) {
-          console.error("Auth error:", error);
-          if (location.pathname !== "/") {
-            await clearSession();
-          }
+        if (sessionError || !session) {
+          console.error("Session error:", sessionError);
+          await clearSession();
           return;
         }
 
-        if (!session) {
-          if (location.pathname !== "/") {
-            await clearSession();
-          }
-          return;
-        }
-
+        // Verify the session is still valid
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
         if (userError || !user) {
           console.error("User verification error:", userError);
-          if (location.pathname !== "/") {
-            await clearSession();
-          }
+          await clearSession();
           return;
         }
 
@@ -61,28 +61,22 @@ export const useAuthCheck = () => {
           setIsLoading(false);
         }
       } catch (error) {
-        console.error("Session check error:", error);
-        if (location.pathname !== "/") {
-          await clearSession();
-        }
-      } finally {
-        if (mounted && location.pathname === "/") {
-          setIsLoading(false);
-        }
+        console.error("Auth check error:", error);
+        await clearSession();
       }
     };
 
+    // Initial auth check
     checkAuth();
 
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
       
       console.log("Auth state changed:", event);
       
-      if (event === 'SIGNED_OUT') {
-        if (location.pathname !== "/") {
-          await clearSession();
-        }
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        await clearSession();
         return;
       }
       
@@ -93,7 +87,6 @@ export const useAuthCheck = () => {
       }
 
       if (event === 'TOKEN_REFRESHED') {
-        console.log("Token refreshed");
         checkAuth();
       }
     });
