@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatBox } from "@/components/ChatBox";
 import { NeuralBackground } from "@/components/NeuralBackground";
@@ -9,9 +10,12 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SignInForm } from "@/components/auth/SignInForm";
+import { SignUpForm } from "@/components/auth/SignUpForm";
 
 const Index = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [authView, setAuthView] = useState<"sign_in" | "sign_up">("sign_in");
+  const navigate = useNavigate();
 
   return (
     <div className="relative min-h-screen flex flex-col overflow-x-hidden">
@@ -47,12 +51,18 @@ const Index = () => {
       <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Sign in to your account</DialogTitle>
+            <DialogTitle>{authView === "sign_up" ? "Create an account" : "Sign in"}</DialogTitle>
             <DialogDescription>
-              Sign in to your account to join the discussion
+              {authView === "sign_up" 
+                ? "Join our community to participate in discussions" 
+                : "Sign in to your account to join the discussion"}
             </DialogDescription>
           </DialogHeader>
-          <SignInForm />
+          {authView === "sign_up" ? (
+            <SignUpForm onViewChange={setAuthView} />
+          ) : (
+            <SignInForm onViewChange={setAuthView} />
+          )}
         </DialogContent>
       </Dialog>
     </div>
