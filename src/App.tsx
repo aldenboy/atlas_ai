@@ -16,9 +16,10 @@ const queryClient = new QueryClient({
 
 const App = () => {
   // Check if we're on atlas.lovable.app
-  const isAtlasDomain = window.location.hostname === 'atlas.lovable.app';
+  const isAtlasDomain = window.location.hostname === 'atlas.lovable.app' || 
+                       window.location.hostname === 'preview--atlas.lovable.app';
 
-  // If we're on atlas.lovable.app, we want to show the Index component
+  // If we're on atlas.lovable.app or its preview domain, show the Index component
   if (isAtlasDomain) {
     return (
       <QueryClientProvider client={queryClient}>
