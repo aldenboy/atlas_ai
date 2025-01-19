@@ -2,12 +2,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export const AuthProjectOverview = () => {
   return (
-    <Card className="bg-background/50 backdrop-blur-sm border-primary/20 h-[100dvh] md:h-[500px] flex flex-col">
-      <CardHeader>
-        <CardTitle>Project Overview</CardTitle>
-        <CardDescription>Discover what makes Atlas unique</CardDescription>
+    <Card className="bg-background/50 backdrop-blur-sm border-primary/20 min-h-[400px] md:h-[500px] flex flex-col">
+      <CardHeader className="space-y-2 md:space-y-4">
+        <div className="flex items-center justify-center">
+          <img 
+            src="/lovable-uploads/6c0018a5-7e4b-44eb-8ac7-f18fefc2076a.png" 
+            alt="ATLAS Logo" 
+            className="h-12 w-auto mb-2"
+          />
+        </div>
+        <CardTitle className="text-center text-xl md:text-2xl">
+          Automated Trading and Learning Analysis System
+        </CardTitle>
+        <CardDescription className="text-center">
+          Discover what makes ATLAS unique
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 flex-1">
+      <CardContent className="space-y-4 flex-1 px-4 md:px-6">
         <div className="space-y-2">
           <h3 className="font-semibold">🤖 AI-Powered Analysis</h3>
           <p className="text-sm text-muted-foreground">
