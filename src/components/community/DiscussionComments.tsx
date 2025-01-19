@@ -40,12 +40,25 @@ export const DiscussionComments = ({ discussionId }: { discussionId: string }) =
 
     setIsSubmitting(true);
     try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to post comments",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from("discussion_comments")
         .insert([
           {
             discussion_id: discussionId,
             content: newComment.trim(),
+            user_id: user.id, // Add the user_id to the insert
           },
         ]);
 
