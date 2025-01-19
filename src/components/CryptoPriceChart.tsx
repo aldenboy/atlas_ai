@@ -6,20 +6,32 @@ import { ChartSkeleton } from "./chart/ChartSkeleton";
 import { ChartError } from "./chart/ChartError";
 import { PriceLineChart } from "./chart/PriceLineChart";
 import { NeonGlowFilter } from "./chart/NeonGlowFilter";
+import { useToast } from "@/components/ui/use-toast";
 
 export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) => {
+  const { toast } = useToast();
+  
   const { data: priceData, isLoading, error } = useQuery({
     queryKey: ['crypto-chart', symbol],
     queryFn: () => fetchCryptoData(symbol),
     refetchInterval: 60000, // Refresh every minute
     staleTime: 30000,
+    retry: 3,
+    onError: (error) => {
+      toast({
+        title: "Error loading chart data",
+        description: "Unable to fetch the latest price data. Please try again later.",
+        variant: "destructive",
+      });
+      console.error('Chart error:', error);
+    }
   });
 
   if (isLoading) {
     return <ChartSkeleton />;
   }
 
-  if (error) {
+  if (error || !priceData) {
     return <ChartError />;
   }
 

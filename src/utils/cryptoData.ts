@@ -4,19 +4,29 @@ export interface PriceData {
 }
 
 export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
-  const response = await fetch(
-    `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=1`
-  );
-  
-  if (!response.ok) {
-    throw new Error('Failed to fetch crypto data');
+  try {
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=1&interval=hourly`
+    );
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.prices || !Array.isArray(data.prices)) {
+      throw new Error('Invalid data format received from API');
+    }
+    
+    return data.prices.map(([timestamp, price]: [number, number]) => ({
+      timestamp,
+      price,
+    }));
+  } catch (error) {
+    console.error('Error fetching crypto data:', error);
+    throw error;
   }
-  
-  const data = await response.json();
-  return data.prices.map(([timestamp, price]: [number, number]) => ({
-    timestamp,
-    price,
-  }));
 };
 
 export const formatTime = (timestamp: number) => {
