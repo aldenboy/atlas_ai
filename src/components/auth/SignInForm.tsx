@@ -5,11 +5,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-interface SignInFormProps {
-  onViewChange: (view: "sign_in" | "sign_up") => void;
-}
-
-export const SignInForm = ({ onViewChange }: SignInFormProps) => {
+export const SignInForm = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -43,17 +39,8 @@ export const SignInForm = ({ onViewChange }: SignInFormProps) => {
         theme="dark"
         providers={[]}
         redirectTo={window.location.origin}
+        view="sign_in"
       />
-      <p className="text-sm text-center text-muted-foreground mt-4">
-        Don't have an account?{" "}
-        <button
-          type="button"
-          onClick={() => onViewChange("sign_up")}
-          className="text-primary hover:underline"
-        >
-          Sign Up
-        </button>
-      </p>
     </>
   );
 };

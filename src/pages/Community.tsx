@@ -3,14 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SignInForm } from "@/components/auth/SignInForm";
-import { SignUpForm } from "@/components/auth/SignUpForm";
 
 const Community = () => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [authView, setAuthView] = useState<"sign_in" | "sign_up">("sign_in");
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,18 +36,12 @@ const Community = () => {
       <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{authView === "sign_up" ? "Create an account" : "Sign in"}</DialogTitle>
+            <DialogTitle>Sign in to your account</DialogTitle>
             <DialogDescription>
-              {authView === "sign_up" 
-                ? "Join our community to participate in discussions" 
-                : "Sign in to your account to join the discussion"}
+              Sign in to your account to join the discussion
             </DialogDescription>
           </DialogHeader>
-          {authView === "sign_up" ? (
-            <SignUpForm onViewChange={setAuthView} />
-          ) : (
-            <SignInForm onViewChange={setAuthView} />
-          )}
+          <SignInForm />
         </DialogContent>
       </Dialog>
     </div>
