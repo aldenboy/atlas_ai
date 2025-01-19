@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus, ArrowRight } from "lucide-react";
-import { DiscussionThread } from "./DiscussionThread";
-import { NewDiscussionForm } from "./NewDiscussionForm";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Link } from "react-router-dom";
-import { SortControls } from "./SortControls";
 import { useDiscussions } from "@/hooks/useDiscussions";
+import { ForumHeader } from "./ForumHeader";
+import { DiscussionList } from "./DiscussionList";
+import { NewDiscussionForm } from "./NewDiscussionForm";
+import { SortControls } from "./SortControls";
 
 type SortOption = "trending" | "new" | "top";
 
@@ -53,44 +51,19 @@ export const DiscussionForum = ({ showAllTopics = false }: DiscussionForumProps)
 
   return (
     <Card className="border border-purple-500/20 bg-black/30 backdrop-blur-md rounded-xl p-6">
-      <CardHeader className="flex flex-row items-center justify-between px-0 pt-0">
-        <CardTitle className="text-2xl font-bold">Community</CardTitle>
-        <div className="flex gap-2">
-          <Button onClick={handleNewDiscussion} size="sm" className="bg-primary hover:bg-primary/90">
-            <Plus className="w-4 h-4 mr-2" />
-            New Discussion
-          </Button>
-          {!showAllTopics && (
-            <Button asChild size="sm" variant="outline">
-              <Link to="/community">
-                View All
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
-            </Button>
-          )}
-        </div>
-      </CardHeader>
+      <ForumHeader 
+        showAllTopics={showAllTopics} 
+        onNewDiscussion={handleNewDiscussion} 
+      />
       <CardContent className="px-0">
         {showAllTopics && (
           <SortControls sortBy={sortBy} onSortChange={setSortBy} />
         )}
 
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="text-center py-8">
-              <p className="text-lg text-muted-foreground">Loading discussions...</p>
-            </div>
-          ) : discussions && discussions.length > 0 ? (
-            discussions.map((discussion) => (
-              <DiscussionThread key={discussion.id} discussion={discussion} />
-            ))
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <p className="text-lg">No discussions yet</p>
-              <p className="text-sm">Be the first to start a discussion!</p>
-            </div>
-          )}
-        </div>
+        <DiscussionList 
+          discussions={discussions || []} 
+          isLoading={isLoading} 
+        />
         
         {showNewDiscussion && (
           <NewDiscussionForm onClose={() => setShowNewDiscussion(false)} />
