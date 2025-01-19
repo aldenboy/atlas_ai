@@ -10,7 +10,7 @@ interface PriceData {
 
 const fetchCryptoData = async (symbol: string = 'bitcoin') => {
   const response = await fetch(
-    `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=1&interval=hourly`
+    `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=1`
   );
   
   if (!response.ok) {
