@@ -21,7 +21,8 @@ export const drawScene = (
   nodes: Node[],
   connectionRadius: number
 ) => {
-  ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+  // Use a very dark background with slight transparency for the fade effect
+  ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   drawConnections(ctx, nodes, connectionRadius);
@@ -75,22 +76,25 @@ export const drawConnections = (
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance < radius) {
-        const alpha = (1 - distance / radius) * 0.2;
+        const alpha = (1 - distance / radius) * 0.15; // Reduced opacity
         ctx.beginPath();
         ctx.moveTo(nodeA.x, nodeA.y);
         ctx.lineTo(nodeB.x, nodeB.y);
-        ctx.strokeStyle = `rgba(147, 51, 234, ${alpha})`;
+        ctx.strokeStyle = `rgba(147, 51, 234, ${alpha})`; // Purple color with reduced opacity
         ctx.stroke();
       }
     });
   });
 };
 
-export const drawNodes = (ctx: CanvasRenderingContext2D, nodes: Node[]) => {
+export const drawNodes = (
+  ctx: CanvasRenderingContext2D,
+  nodes: Node[]
+) => {
   nodes.forEach((node) => {
     ctx.beginPath();
-    ctx.arc(node.x, node.y, 2, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(147, 51, 234, 0.5)";
+    ctx.arc(node.x, node.y, 1.5, 0, Math.PI * 2); // Slightly smaller nodes
+    ctx.fillStyle = "rgba(147, 51, 234, 0.4)"; // Purple color with reduced opacity
     ctx.fill();
   });
 };
