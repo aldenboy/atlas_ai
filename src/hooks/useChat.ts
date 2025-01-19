@@ -22,18 +22,34 @@ export const useChat = () => {
 
   const handleDownloadPaper = async (filePath: string) => {
     try {
+      // First, check if the file exists
+      const { data: fileExists, error: checkError } = await supabase.storage
+        .from('research_papers')
+        .list(filePath.split('/')[0]);
+
+      if (checkError) throw checkError;
+      
+      if (!fileExists || fileExists.length === 0) {
+        throw new Error('Research paper not found');
+      }
+
+      // If file exists, proceed with download
       const { data, error } = await supabase.storage
         .from('research_papers')
         .download(filePath);
       
       if (error) throw error;
 
-      const url = window.URL.createObjectURL(data);
+      // Create and trigger download
+      const blob = new Blob([data], { type: 'text/markdown' });
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = filePath.split('/').pop() || 'research-paper.md';
       document.body.appendChild(a);
       a.click();
+      
+      // Cleanup
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
@@ -45,7 +61,7 @@ export const useChat = () => {
       console.error('Error downloading paper:', error);
       toast({
         title: "Error",
-        description: "Failed to download research paper. Please try again.",
+        description: error.message || "Failed to download research paper. Please try again.",
         variant: "destructive"
       });
     }
