@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChatHeader } from "./chat/ChatHeader";
 import { ChatMessages } from "./chat/ChatMessages";
 import { ChatInput } from "./chat/ChatInput";
+import { Button } from "./ui/button";
+import { Sparkles } from "lucide-react";
 
 interface Message {
   text: string;
@@ -35,6 +37,37 @@ export const ChatBox = () => {
       title: "Conversation Reset",
       description: "The conversation has been reset. You can start a new analysis.",
     });
+  };
+
+  const handleShillMe = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('chat-with-atlas', {
+        body: { 
+          message: "Please shill me a random trending cryptocurrency! Be enthusiastic and include some emojis, but also mention risks. Include social media buzz and recent price action.",
+          currentTicker: null
+        }
+      });
+
+      if (error) throw error;
+
+      setMessages((prev) => [
+        ...prev,
+        { text: "Shill me a random trending crypto! 🚀", isUser: true },
+        { text: data.response, isUser: false }
+      ]);
+    } catch (error: any) {
+      console.error('Error getting shill:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get crypto shill. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,6 +150,18 @@ export const ChatBox = () => {
         onRefresh={handleRefresh}
         isLoading={isLoading}
       />
+      <div className="absolute top-4 right-20 z-10">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleShillMe}
+          disabled={isLoading}
+          className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-200"
+        >
+          <Sparkles className="w-4 h-4 mr-2" />
+          Shill Me!
+        </Button>
+      </div>
       <ChatMessages messages={messages} />
       <ChatInput
         message={message}
