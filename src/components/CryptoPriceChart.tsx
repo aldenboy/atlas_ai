@@ -46,7 +46,7 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
   };
 
   return (
-    <Card className="p-4 mb-8 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
+    <Card className="p-4 mb-16 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20">
       <div className="h-[300px]">
         <NeonGlowFilter />
         <ChartContainer config={config}>
