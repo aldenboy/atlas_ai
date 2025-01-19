@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Discussion } from "@/components/community/DiscussionThread";
 
 type SortOption = "trending" | "new" | "top";
 
@@ -44,7 +45,7 @@ export const useDiscussions = (sortBy: SortOption, limit?: number) => {
       }
       
       console.log("Fetched discussions:", data);
-      return data;
+      return data as Discussion[];
     },
     refetchOnWindowFocus: false
   });

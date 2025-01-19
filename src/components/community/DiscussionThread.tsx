@@ -6,7 +6,7 @@ import { VoteControls } from "./VoteControls";
 import { DiscussionActions } from "./DiscussionActions";
 import { DiscussionComments } from "./DiscussionComments";
 
-interface Discussion {
+export interface Discussion {
   id: string;
   title: string;
   content: string;
@@ -18,7 +18,7 @@ interface Discussion {
     profile: {
       username: string;
     };
-  };
+  } | null;
   discussion_comments: { count: number }[];
 }
 
@@ -54,7 +54,7 @@ export const DiscussionThread = ({ discussion }: { discussion: Discussion }) => 
                   {discussion.category}
                 </span>
                 <span>•</span>
-                <span>Posted by {discussion.user?.profile?.username}</span>
+                <span>Posted by {discussion.user?.profile?.username || 'Anonymous'}</span>
                 <span>•</span>
                 <span>
                   {formatDistance(new Date(discussion.created_at), new Date(), { addSuffix: true })}
