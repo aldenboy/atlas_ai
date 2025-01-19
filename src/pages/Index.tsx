@@ -16,7 +16,6 @@ const Index = () => {
   const { currentTicker } = useChat();
   const [chartSymbol, setChartSymbol] = useState('bitcoin');
 
-  // Update chart when Atlas changes the current ticker
   useEffect(() => {
     if (currentTicker) {
       setChartSymbol(currentTicker.toLowerCase());
@@ -32,7 +31,7 @@ const Index = () => {
       </div>
       
       <main className="flex-1 container mx-auto px-4 py-8 relative z-10">
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
           <div className="w-full">
             <ChatBox />
           </div>
@@ -41,12 +40,13 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="w-full mb-16">
-          <CryptoPriceChart symbol={chartSymbol} />
-        </div>
-        
-        <div className="w-full">
-          <DiscussionForum showAllTopics={false} />
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="w-full">
+            <CryptoPriceChart symbol={chartSymbol} />
+          </div>
+          <div className="w-full">
+            <DiscussionForum showAllTopics={false} />
+          </div>
         </div>
       </main>
       
