@@ -65,16 +65,20 @@ export const MarketSentimentChart = () => {
 
   return (
     <div className="relative">
-      {/* Animated Bubbles Background */}
+      {/* Animated Bubbles Background - Made larger and more visible */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute w-20 h-20 bg-primary/10 rounded-full -top-10 -left-10 animate-float" />
-        <div className="absolute w-16 h-16 bg-primary/5 rounded-full top-20 right-10 animate-float [animation-delay:1s]" />
-        <div className="absolute w-12 h-12 bg-primary/10 rounded-full bottom-10 left-10 animate-float [animation-delay:2s]" />
-        <div className="absolute w-24 h-24 bg-primary/5 rounded-full -bottom-12 -right-12 animate-float [animation-delay:3s]" />
+        <div className="absolute w-32 h-32 bg-primary/20 rounded-full -top-16 -left-16 animate-float blur-xl" />
+        <div className="absolute w-40 h-40 bg-primary/15 rounded-full top-20 right-10 animate-float [animation-delay:1s] blur-xl" />
+        <div className="absolute w-36 h-36 bg-primary/20 rounded-full bottom-10 left-10 animate-float [animation-delay:2s] blur-xl" />
+        <div className="absolute w-48 h-48 bg-primary/15 rounded-full -bottom-20 -right-20 animate-float [animation-delay:3s] blur-xl" />
+        
+        {/* Additional bubbles for more dynamic effect */}
+        <div className="absolute w-24 h-24 bg-primary/10 rounded-full top-1/3 left-1/4 animate-float [animation-delay:2.5s] blur-xl" />
+        <div className="absolute w-28 h-28 bg-primary/25 rounded-full bottom-1/3 right-1/4 animate-float [animation-delay:1.5s] blur-xl" />
       </div>
 
-      {/* Main Content */}
-      <Card className="relative p-6 rounded-xl bg-black/30 backdrop-blur-md border-0 shadow-lg">
+      {/* Main Content - Enhanced glassmorphism effect */}
+      <Card className="relative p-6 rounded-xl bg-black/40 backdrop-blur-xl border-0 shadow-2xl">
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-white">Bitcoin Dominance</h3>
           <p className="text-sm text-muted-foreground">Market Share %</p>
