@@ -5,8 +5,15 @@ export interface PriceData {
 
 export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
   try {
+    // Remove interval parameter and set days=2 to get hourly data automatically
     const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=1&interval=hourly`
+      `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=2`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      }
     );
     
     if (!response.ok) {
@@ -19,7 +26,10 @@ export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
       throw new Error('Invalid data format received from API');
     }
     
-    return data.prices.map(([timestamp, price]: [number, number]) => ({
+    // Take only the last 24 data points to show last 24 hours
+    const last24Hours = data.prices.slice(-24);
+    
+    return last24Hours.map(([timestamp, price]: [number, number]) => ({
       timestamp,
       price,
     }));
