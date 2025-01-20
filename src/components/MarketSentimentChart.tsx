@@ -64,57 +64,68 @@ export const MarketSentimentChart = () => {
   };
 
   return (
-    <Card className="p-6 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20 h-full">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-white">Bitcoin Dominance</h3>
-        <p className="text-sm text-muted-foreground">Market Share %</p>
+    <div className="relative">
+      {/* Animated Bubbles Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute w-20 h-20 bg-primary/10 rounded-full -top-10 -left-10 animate-float" />
+        <div className="absolute w-16 h-16 bg-primary/5 rounded-full top-20 right-10 animate-float [animation-delay:1s]" />
+        <div className="absolute w-12 h-12 bg-primary/10 rounded-full bottom-10 left-10 animate-float [animation-delay:2s]" />
+        <div className="absolute w-24 h-24 bg-primary/5 rounded-full -bottom-12 -right-12 animate-float [animation-delay:3s]" />
       </div>
-      <div className="h-[300px]">
-        <ChartContainer config={config}>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={dominanceData}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" />
-              <XAxis 
-                dataKey="created_at"
-                tickFormatter={(timestamp) => formatDistanceToNow(new Date(timestamp), { addSuffix: true })}
-                className="text-muted-foreground"
-              />
-              <YAxis
-                domain={[0, 100]}
-                tickFormatter={(value) => `${value}%`}
-                className="text-muted-foreground"
-                label={{ 
-                  value: 'Dominance %', 
-                  angle: -90, 
-                  position: 'insideLeft',
-                  className: "text-muted-foreground"
-                }}
-              />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const dominance = payload[0].value as number;
-                    return (
-                      <div className="bg-background/95 p-2 rounded-lg border border-border shadow-lg">
-                        <p className="text-sm font-medium">BTC Dominance</p>
-                        <p className="text-sm text-muted-foreground">{dominance.toFixed(2)}%</p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="btc_dominance"
-                stroke="#F7931A"
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </div>
-    </Card>
+
+      {/* Main Content */}
+      <Card className="relative p-6 rounded-xl bg-black/30 backdrop-blur-md border-0 shadow-lg">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-white">Bitcoin Dominance</h3>
+          <p className="text-sm text-muted-foreground">Market Share %</p>
+        </div>
+        <div className="h-[300px]">
+          <ChartContainer config={config}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={dominanceData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" />
+                <XAxis 
+                  dataKey="created_at"
+                  tickFormatter={(timestamp) => formatDistanceToNow(new Date(timestamp), { addSuffix: true })}
+                  className="text-muted-foreground"
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  tickFormatter={(value) => `${value}%`}
+                  className="text-muted-foreground"
+                  label={{ 
+                    value: 'Dominance %', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    className: "text-muted-foreground"
+                  }}
+                />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const dominance = payload[0].value as number;
+                      return (
+                        <div className="bg-background/95 p-2 rounded-lg border border-border shadow-lg backdrop-blur-md">
+                          <p className="text-sm font-medium">BTC Dominance</p>
+                          <p className="text-sm text-muted-foreground">{dominance.toFixed(2)}%</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="btc_dominance"
+                  stroke="#F7931A"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </div>
+      </Card>
+    </div>
   );
 };
