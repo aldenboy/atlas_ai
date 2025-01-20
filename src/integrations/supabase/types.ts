@@ -187,6 +187,7 @@ export type Database = {
       }
       market_sentiment: {
         Row: {
+          btc_dominance: number | null
           created_at: string | null
           id: string
           market_cap: number | null
@@ -199,6 +200,7 @@ export type Database = {
           volume_24h: number | null
         }
         Insert: {
+          btc_dominance?: number | null
           created_at?: string | null
           id?: string
           market_cap?: number | null
@@ -211,6 +213,7 @@ export type Database = {
           volume_24h?: number | null
         }
         Update: {
+          btc_dominance?: number | null
           created_at?: string | null
           id?: string
           market_cap?: number | null

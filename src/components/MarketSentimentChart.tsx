@@ -8,15 +8,15 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "./ui/use-toast";
 
-interface SentimentData {
+interface DominanceData {
   created_at: string;
-  sentiment_score: number;
+  btc_dominance: number;
 }
 
-const fetchSentimentData = async () => {
+const fetchDominanceData = async () => {
   const { data, error } = await supabase
     .from('market_sentiment')
-    .select('created_at, sentiment_score')
+    .select('created_at, btc_dominance')
     .order('created_at', { ascending: true })
     .limit(24);
 
@@ -27,17 +27,17 @@ const fetchSentimentData = async () => {
 export const MarketSentimentChart = () => {
   const { toast } = useToast();
   
-  const { data: sentimentData, isLoading, error } = useQuery({
-    queryKey: ['market-sentiment'],
-    queryFn: fetchSentimentData,
+  const { data: dominanceData, isLoading, error } = useQuery({
+    queryKey: ['btc-dominance'],
+    queryFn: fetchDominanceData,
     refetchInterval: 300000, // Refresh every 5 minutes
     staleTime: 60000,
     retry: 3,
     meta: {
       onError: () => {
         toast({
-          title: "Error loading sentiment data",
-          description: "Unable to fetch the latest market sentiment data. Please try again later.",
+          title: "Error loading BTC dominance data",
+          description: "Unable to fetch the latest BTC dominance data. Please try again later.",
           variant: "destructive",
         });
       }
@@ -48,17 +48,17 @@ export const MarketSentimentChart = () => {
     return <ChartSkeleton />;
   }
 
-  if (error || !sentimentData) {
+  if (error || !dominanceData) {
     console.error('Chart error:', error);
     return <ChartError />;
   }
 
   const config = {
-    sentiment: {
-      label: 'Market Sentiment',
+    dominance: {
+      label: 'BTC Dominance',
       theme: {
-        light: '#646cff',
-        dark: '#646cff'
+        light: '#F7931A',
+        dark: '#F7931A'
       }
     }
   };
@@ -66,13 +66,13 @@ export const MarketSentimentChart = () => {
   return (
     <Card className="p-6 rounded-xl bg-black/30 backdrop-blur-md border border-purple-500/20 h-full">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-white">Market Sentiment Index</h3>
-        <p className="text-sm text-muted-foreground">Fear vs Greed</p>
+        <h3 className="text-lg font-semibold text-white">Bitcoin Dominance</h3>
+        <p className="text-sm text-muted-foreground">Market Share %</p>
       </div>
       <div className="h-[300px]">
         <ChartContainer config={config}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={sentimentData}>
+            <LineChart data={dominanceData}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted/20" />
               <XAxis 
                 dataKey="created_at"
@@ -81,10 +81,10 @@ export const MarketSentimentChart = () => {
               />
               <YAxis
                 domain={[0, 100]}
-                tickFormatter={(value) => `${value}`}
+                tickFormatter={(value) => `${value}%`}
                 className="text-muted-foreground"
                 label={{ 
-                  value: 'Sentiment Score', 
+                  value: 'Dominance %', 
                   angle: -90, 
                   position: 'insideLeft',
                   className: "text-muted-foreground"
@@ -93,18 +93,11 @@ export const MarketSentimentChart = () => {
               <Tooltip
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
-                    const score = payload[0].value as number;
-                    let sentiment = "Neutral";
-                    if (score >= 75) sentiment = "Extreme Greed";
-                    else if (score >= 60) sentiment = "Greed";
-                    else if (score >= 45) sentiment = "Neutral";
-                    else if (score >= 25) sentiment = "Fear";
-                    else sentiment = "Extreme Fear";
-                    
+                    const dominance = payload[0].value as number;
                     return (
                       <div className="bg-background/95 p-2 rounded-lg border border-border shadow-lg">
-                        <p className="text-sm font-medium">{sentiment}</p>
-                        <p className="text-sm text-muted-foreground">Score: {score}</p>
+                        <p className="text-sm font-medium">BTC Dominance</p>
+                        <p className="text-sm text-muted-foreground">{dominance.toFixed(2)}%</p>
                       </div>
                     );
                   }
@@ -113,18 +106,11 @@ export const MarketSentimentChart = () => {
               />
               <Line
                 type="monotone"
-                dataKey="sentiment_score"
-                stroke="url(#sentiment-gradient)"
+                dataKey="btc_dominance"
+                stroke="#F7931A"
                 strokeWidth={2}
                 dot={false}
               />
-              <defs>
-                <linearGradient id="sentiment-gradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#22c55e" />
-                  <stop offset="50%" stopColor="#eab308" />
-                  <stop offset="100%" stopColor="#ef4444" />
-                </linearGradient>
-              </defs>
             </LineChart>
           </ResponsiveContainer>
         </ChartContainer>
