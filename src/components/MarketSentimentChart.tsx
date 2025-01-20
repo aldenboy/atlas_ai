@@ -7,6 +7,9 @@ import { ChartError } from "./chart/ChartError";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "./ui/use-toast";
+import { AnimatedBubblesBackground } from "./chart/AnimatedBubblesBackground";
+import { ChartHeader } from "./chart/ChartHeader";
+import { DominanceTooltip } from "./chart/DominanceTooltip";
 
 interface DominanceData {
   created_at: string;
@@ -30,7 +33,7 @@ export const MarketSentimentChart = () => {
   const { data: dominanceData, isLoading, error } = useQuery({
     queryKey: ['btc-dominance'],
     queryFn: fetchDominanceData,
-    refetchInterval: 300000, // Refresh every 5 minutes
+    refetchInterval: 300000,
     staleTime: 60000,
     retry: 3,
     meta: {
@@ -44,10 +47,7 @@ export const MarketSentimentChart = () => {
     }
   });
 
-  if (isLoading) {
-    return <ChartSkeleton />;
-  }
-
+  if (isLoading) return <ChartSkeleton />;
   if (error || !dominanceData) {
     console.error('Chart error:', error);
     return <ChartError />;
@@ -65,24 +65,12 @@ export const MarketSentimentChart = () => {
 
   return (
     <div className="relative">
-      {/* Animated Bubbles Background - Made larger and more visible */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute w-32 h-32 bg-primary/20 rounded-full -top-16 -left-16 animate-float blur-xl" />
-        <div className="absolute w-40 h-40 bg-primary/15 rounded-full top-20 right-10 animate-float [animation-delay:1s] blur-xl" />
-        <div className="absolute w-36 h-36 bg-primary/20 rounded-full bottom-10 left-10 animate-float [animation-delay:2s] blur-xl" />
-        <div className="absolute w-48 h-48 bg-primary/15 rounded-full -bottom-20 -right-20 animate-float [animation-delay:3s] blur-xl" />
-        
-        {/* Additional bubbles for more dynamic effect */}
-        <div className="absolute w-24 h-24 bg-primary/10 rounded-full top-1/3 left-1/4 animate-float [animation-delay:2.5s] blur-xl" />
-        <div className="absolute w-28 h-28 bg-primary/25 rounded-full bottom-1/3 right-1/4 animate-float [animation-delay:1.5s] blur-xl" />
-      </div>
-
-      {/* Main Content - Enhanced glassmorphism effect */}
+      <AnimatedBubblesBackground />
       <Card className="relative p-6 rounded-xl bg-black/40 backdrop-blur-xl border-0 shadow-2xl">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-white">Bitcoin Dominance</h3>
-          <p className="text-sm text-muted-foreground">Market Share %</p>
-        </div>
+        <ChartHeader 
+          title="Bitcoin Dominance" 
+          subtitle="Market Share %" 
+        />
         <div className="h-[300px]">
           <ChartContainer config={config}>
             <ResponsiveContainer width="100%" height="100%">
@@ -104,20 +92,7 @@ export const MarketSentimentChart = () => {
                     className: "text-muted-foreground"
                   }}
                 />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const dominance = payload[0].value as number;
-                      return (
-                        <div className="bg-background/95 p-2 rounded-lg border border-border shadow-lg backdrop-blur-md">
-                          <p className="text-sm font-medium">BTC Dominance</p>
-                          <p className="text-sm text-muted-foreground">{dominance.toFixed(2)}%</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
+                <Tooltip content={DominanceTooltip} />
                 <Line
                   type="monotone"
                   dataKey="btc_dominance"
