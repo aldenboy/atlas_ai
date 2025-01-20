@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from "@/integrations/supabase/client";
 
 type TickerItem = {
   symbol: string;
@@ -19,15 +20,11 @@ const stockData: TickerItem[] = [
 
 const fetchCryptoData = async () => {
   try {
-    const response = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,ripple&vs_currencies=usd&include_24hr_change=true'
-    );
+    const { data, error } = await supabase.functions.invoke('crypto-data', {
+      body: { endpoint: 'current-prices' }
+    });
     
-    if (!response.ok) {
-      throw new Error('Failed to fetch crypto data');
-    }
-    
-    const data = await response.json();
+    if (error) throw error;
     
     return [
       { symbol: 'BTC/USD', price: data.bitcoin.usd, change: data.bitcoin.usd_24h_change, type: 'crypto' as const },

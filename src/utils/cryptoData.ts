@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface PriceData {
   timestamp: number;
   price: number;
@@ -5,22 +7,14 @@ export interface PriceData {
 
 export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
   try {
-    // Remove interval parameter and set days=2 to get hourly data automatically
-    const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=2`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache'
-        }
-      }
-    );
+    const { data, error } = await supabase.functions.invoke('crypto-data', {
+      body: { endpoint: 'price-history', symbol }
+    });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (error) {
+      console.error('Error fetching crypto data:', error);
+      throw error;
     }
-    
-    const data = await response.json();
     
     if (!data.prices || !Array.isArray(data.prices)) {
       throw new Error('Invalid data format received from API');
