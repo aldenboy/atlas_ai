@@ -17,10 +17,15 @@ export const CryptoPriceChart = ({ symbol = 'bitcoin' }: { symbol?: string }) =>
     refetchInterval: 60000, // Refresh every minute
     staleTime: 30000,
     retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     gcTime: 300000,
     meta: {
-      errorMessage: "Unable to fetch the latest price data. Please try again later."
+      onError: () => {
+        toast({
+          title: "Error loading chart data",
+          description: "Unable to fetch the latest price data. Please try again later.",
+          variant: "destructive",
+        });
+      }
     }
   });
 

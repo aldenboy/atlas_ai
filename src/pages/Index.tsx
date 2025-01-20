@@ -8,7 +8,6 @@ import { LogOut } from "lucide-react";
 import { AuthProjectOverview } from "@/components/auth/AuthProjectOverview";
 import { useAuth } from "@/contexts/AuthContext";
 import { RoadmapCard } from "@/components/RoadmapCard";
-import { CryptoPriceChart } from "@/components/CryptoPriceChart";
 
 const Index = () => {
   const { session, signOut } = useAuth();
@@ -29,10 +28,6 @@ const Index = () => {
           <div className="w-full">
             <AuthProjectOverview />
           </div>
-        </div>
-        
-        <div className="mb-8">
-          <CryptoPriceChart symbol="bitcoin" />
         </div>
         
         <div className="grid md:grid-cols-2 gap-8">
