@@ -5,8 +5,9 @@ export interface PriceData {
 
 export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
   try {
+    // Removed interval parameter since it's enterprise-only
     const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=1&interval=hourly`
+      `https://api.coingecko.com/api/v3/coins/${symbol}/market_chart?vs_currency=usd&days=2`
     );
     
     if (!response.ok) {
