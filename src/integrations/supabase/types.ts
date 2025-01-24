@@ -311,6 +311,42 @@ export type Database = {
         }
         Relationships: []
       }
+      trading_signals: {
+        Row: {
+          ai_analysis: string | null
+          created_at: string | null
+          entry_price: number
+          id: string
+          pair: string
+          stop_loss: number
+          take_profit: number
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_analysis?: string | null
+          created_at?: string | null
+          entry_price: number
+          id?: string
+          pair: string
+          stop_loss: number
+          take_profit: number
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_analysis?: string | null
+          created_at?: string | null
+          entry_price?: number
+          id?: string
+          pair?: string
+          stop_loss?: number
+          take_profit?: number
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

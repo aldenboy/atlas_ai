@@ -32,10 +32,8 @@ serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const endpoint = url.searchParams.get('endpoint');
-    const symbol = url.searchParams.get('symbol') || 'bitcoin';
-
+    const { endpoint, symbol = 'bitcoin' } = await req.json();
+    
     if (!endpoint) {
       throw new Error('Endpoint parameter is required');
     }
@@ -55,6 +53,9 @@ serve(async (req) => {
 
     console.log(`Fetching from CoinGecko: ${apiUrl}`);
     const response = await fetchWithRetry(apiUrl);
+    if (!response) {
+      throw new Error('Failed to fetch data from CoinGecko');
+    }
     const data = await response.json();
 
     return new Response(JSON.stringify(data), {
