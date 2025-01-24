@@ -21,7 +21,9 @@ const stockData: TickerItem[] = [
 const fetchCryptoData = async () => {
   try {
     const { data, error } = await supabase.functions.invoke('crypto-data', {
-      body: { endpoint: 'current-prices' }
+      body: { 
+        endpoint: 'current-prices'
+      }
     });
     
     if (error) throw error;

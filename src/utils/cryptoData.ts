@@ -8,7 +8,10 @@ export interface PriceData {
 export const fetchCryptoData = async (symbol: string = 'bitcoin') => {
   try {
     const { data, error } = await supabase.functions.invoke('crypto-data', {
-      body: { endpoint: 'price-history', symbol }
+      body: { 
+        endpoint: 'price-history', 
+        symbol 
+      }
     });
     
     if (error) {
